@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetIQ — AI-Powered Bet Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08090d;
+  --bg2:#0e1017;
+  --bg3:#13151f;
+  --green:#1ff18f;
+  --green2:rgba(31,241,143,0.08);
+  --green3:rgba(31,241,143,0.15);
+  --text:#e3e9f6;
+  --muted:#7183a0;
+  --dim:#45546b;
+  --border:rgba(113,131,160,0.15);
+  --border2:rgba(31,241,143,0.2);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+.mono{font-family:'DM Mono',monospace}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 2.5rem;border-bottom:1px solid var(--border);background:rgba(8,9,13,0.92);backdrop-filter:blur(12px)}
+.logo{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;color:var(--text)}
+.logo span{color:var(--green)}
+.nav-links{display:flex;align-items:center;gap:2rem}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:600;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:600;transition:all 0.2s}
+.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+.btn-green{background:var(--green);border:none;color:#08090d;padding:0.5rem 1.3rem;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:700;transition:all 0.2s}
+.btn-green:hover{opacity:0.88;transform:translateY(-1px)}
+#user-nav{display:none;align-items:center;gap:1rem}
+.credit-badge{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--green);background:var(--green2);border:1px solid var(--border2);padding:0.3rem 0.8rem;border-radius:20px}
+
+/* PAGES */
+.page{display:none;padding-top:70px;min-height:100vh}
+.page.active{display:block}
+
+/* ── LANDING ── */
+#page-home{padding-top:0}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(31,241,143,0.06) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:var(--green2);border:1px solid var(--border2);color:var(--green);font-family:'DM Mono',monospace;font-size:0.72rem;padding:0.4rem 1rem;border-radius:20px;margin-bottom:2rem;letter-spacing:0.5px}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero h1{font-size:clamp(3rem,8vw,6rem);font-weight:800;line-height:1;letter-spacing:-2px;margin-bottom:1.5rem}
+.hero h1 .dim-text{color:rgba(227,233,246,0.2);display:block}
+.hero h1 .green-text{color:var(--green);display:block}
+.hero-sub{font-size:1rem;color:var(--muted);max-width:520px;line-height:1.7;margin-bottom:2.5rem}
+.hero-sub strong{color:var(--text)}
+.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-bottom:4rem}
+.btn-big{padding:0.85rem 2rem;border-radius:10px;font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;border:none}
+.btn-big.green{background:var(--green);color:#08090d}
+.btn-big.green:hover{opacity:0.88;transform:translateY(-2px)}
+.btn-big.outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-big.outline:hover{border-color:var(--green);color:var(--green)}
+.stats-row{display:flex;gap:3rem;justify-content:center;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-size:2.5rem;font-weight:800;color:var(--green);line-height:1}
+.stat-label{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--dim);letter-spacing:1px;margin-top:4px;text-transform:uppercase}
+
+/* TICKER */
+.ticker-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:0.8rem 0;background:var(--bg2);margin:2rem 0}
+.ticker{display:flex;gap:0;white-space:nowrap;animation:ticker 25s linear infinite}
+.ticker-item{padding:0 2rem;font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--dim);background:var(--green);color:#08090d;font-weight:500;margin-right:1rem;padding:0.3rem 1rem;border-radius:4px}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* FEATURES */
+.features{padding:5rem 2rem;max-width:1100px;margin:0 auto}
+.section-label{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem}
+.section-title{font-size:clamp(2rem,4vw,3rem);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:1rem}
+.section-title .dim{color:var(--dim)}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin-top:3rem}
+.feature-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all 0.3s;position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0;transition:opacity 0.3s}
+.feature-card:hover{border-color:var(--border2);transform:translateY(-4px)}
+.feature-card:hover::before{opacity:1}
+.feature-icon{font-size:1.8rem;margin-bottom:1rem}
+.feature-name{font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.5rem;letter-spacing:0.5px}
+.feature-desc{font-size:0.82rem;color:var(--muted);line-height:1.6}
+
+/* ── AUTH PAGE ── */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:100%;max-width:420px}
+.auth-logo{font-size:1.5rem;font-weight:800;margin-bottom:0.5rem}
+.auth-logo span{color:var(--green)}
+.auth-sub{font-size:0.82rem;color:var(--muted);margin-bottom:2rem}
+.auth-tabs{display:flex;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:1.5rem}
+.auth-tab{flex:1;padding:0.6rem;text-align:center;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;color:var(--muted);transition:all 0.2s;border:none;background:none;font-family:'Syne',sans-serif}
+.auth-tab.active{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
+.form-group{margin-bottom:1rem}
+.form-label{font-size:0.75rem;font-weight:600;color:var(--muted);margin-bottom:0.4rem;display:block;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.5px}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;color:var(--text);font-family:'Syne',sans-serif;font-size:0.9rem;outline:none;transition:border-color 0.2s}
+.form-input:focus{border-color:var(--green)}
+.form-input::placeholder{color:var(--dim)}
+.btn-full{width:100%;padding:0.85rem;border-radius:10px;font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;margin-top:0.5rem}
+.btn-full.green{background:var(--green);color:#08090d}
+.btn-full.green:hover{opacity:0.88}
+.btn-full:disabled{opacity:0.4;cursor:not-allowed}
+.auth-msg{font-size:0.8rem;margin-top:0.75rem;text-align:center;min-height:1.2rem}
+.auth-msg.error{color:#ff6b6b}
+.auth-msg.success{color:var(--green)}
+
+/* ── DASHBOARD ── */
+.dashboard{max-width:900px;margin:0 auto;padding:2rem}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.dash-title{font-size:1.5rem;font-weight:800}
+.plan-badge{font-family:'DM Mono',monospace;font-size:0.72rem;padding:0.35rem 0.8rem;border-radius:20px;font-weight:500}
+.plan-free{background:rgba(113,131,160,0.15);color:var(--muted)}
+.plan-pro{background:rgba(31,241,143,0.12);color:var(--green);border:1px solid var(--border2)}
+.plan-sharp{background:rgba(255,215,0,0.1);color:#ffd700;border:1px solid rgba(255,215,0,0.3)}
+.dash-nav{display:flex;gap:0.5rem;margin-bottom:2rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:4px}
+.dash-tab{flex:1;padding:0.6rem 1rem;border-radius:9px;border:none;background:none;color:var(--muted);font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center}
+.dash-tab.active{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+
+/* ANALYZE TAB */
+.analyze-section{display:none}
+.analyze-section.active{display:block}
+.input-mode-tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem}
+.mode-tab{padding:0.5rem 1.2rem;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.mode-tab.active{background:var(--green2);border-color:var(--border2);color:var(--green)}
+.upload-zone{border:2px dashed var(--border);border-radius:16px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg2)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--green);background:var(--green2)}
+.upload-icon{font-size:2.5rem;margin-bottom:1rem}
+.upload-title{font-size:1rem;font-weight:700;margin-bottom:0.4rem}
+.upload-sub{font-size:0.78rem;color:var(--muted);font-family:'DM Mono',monospace}
+#file-input{display:none}
+.uploaded-file{display:none;align-items:center;gap:0.75rem;background:var(--green2);border:1px solid var(--border2);border-radius:10px;padding:0.75rem 1rem;margin-top:1rem}
+.uploaded-file.show{display:flex}
+.uploaded-name{font-size:0.82rem;font-family:'DM Mono',monospace;color:var(--green)}
+.sport-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;color:var(--text);font-family:'Syne',sans-serif;font-size:0.9rem;outline:none;cursor:pointer;margin-bottom:1rem}
+.sport-select:focus{border-color:var(--green)}
+.context-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;color:var(--text);font-family:'DM Mono',monospace;font-size:0.82rem;outline:none;resize:vertical;min-height:80px;transition:border-color 0.2s}
+.context-input:focus{border-color:var(--green)}
+.context-input::placeholder{color:var(--dim)}
+.analyze-btn{width:100%;margin-top:1.2rem;padding:1rem;border-radius:12px;border:none;background:var(--green);color:#08090d;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+.analyze-btn:hover{opacity:0.88;transform:translateY(-1px)}
+.analyze-btn:disabled{opacity:0.4;cursor:not-allowed}
+
+/* LOADING */
+.loading-state{display:none;text-align:center;padding:3rem 2rem}
+.loading-state.show{display:block}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.5rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-steps-list{display:flex;flex-direction:column;gap:0.5rem;max-width:300px;margin:1rem auto 0}
+.loading-step{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--dim);transition:color 0.3s;display:flex;align-items:center;gap:0.5rem}
+.loading-step.done{color:var(--green)}
+.loading-step.done::before{content:'✓'}
+.loading-step:not(.done)::before{content:'○'}
+
+/* RESULTS */
+.results-state{display:none}
+.results-state.show{display:block}
+.result-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.grade-circle{width:80px;height:80px;border-radius:50%;border:3px solid var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--green2)}
+.grade-letter{font-size:2rem;font-weight:800;color:var(--green);line-height:1}
+.grade-title-sm{font-size:0.55rem;font-family:'DM Mono',monospace;color:var(--green);letter-spacing:1px}
+.result-summary{flex:1;padding-left:1.5rem}
+.result-verdict{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:0.5rem;line-height:1.5}
+.result-meta{display:flex;gap:1rem;flex-wrap:wrap}
+.meta-pill{font-family:'DM Mono',monospace;font-size:0.7rem;padding:0.3rem 0.8rem;border-radius:20px;border:1px solid var(--border)}
+.meta-pill.pos{background:rgba(31,241,143,0.08);color:var(--green);border-color:var(--border2)}
+.meta-pill.neg{background:rgba(255,107,107,0.08);color:#ff6b6b;border-color:rgba(255,107,107,0.2)}
+.meta-pill.neu{background:var(--bg3);color:var(--muted)}
+.bet-cards{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem}
+.bet-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.5rem;transition:border-color 0.2s}
+.bet-card:hover{border-color:var(--border2)}
+.bet-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;gap:1rem}
+.bet-player{font-size:1rem;font-weight:700}
+.bet-team{font-size:0.72rem;font-family:'DM Mono',monospace;color:var(--muted)}
+.bet-prob{text-align:right}
+.prob-num{font-size:1.8rem;font-weight:800;font-family:'DM Mono',monospace;line-height:1}
+.prob-high{color:var(--green)}
+.prob-mid{color:#f0b429}
+.prob-low{color:#ff6b6b}
+.prob-label{font-size:0.65rem;font-family:'DM Mono',monospace;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.bet-line-text{font-size:0.78rem;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:0.75rem;background:var(--bg3);padding:0.4rem 0.8rem;border-radius:6px;display:inline-block}
+.prob-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:1rem}
+.prob-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.fill-high{background:var(--green)}
+.fill-mid{background:#f0b429}
+.fill-low{background:#ff6b6b}
+.bet-insight{font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;padding-left:0.75rem;border-left:2px solid var(--border2)}
+.bet-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem;margin-bottom:1rem}
+.stat-box{background:var(--bg3);border-radius:8px;padding:0.6rem 0.8rem}
+.stat-box-label{font-size:0.65rem;font-family:'DM Mono',monospace;color:var(--dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px}
+.stat-box-val{font-size:0.85rem;font-weight:600;color:var(--text)}
+.factors{display:flex;flex-direction:column;gap:0.4rem}
+.factor{font-size:0.78rem;display:flex;align-items:flex-start;gap:0.5rem;line-height:1.5}
+.factor.pos{color:var(--green)}
+.factor.neg{color:#ff6b6b}
+.factor.neu{color:var(--muted)}
+.factor-dot{flex-shrink:0;margin-top:3px}
+.parlay-summary{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem}
+.parlay-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.parlay-title{font-size:0.8rem;font-family:'DM Mono',monospace;color:var(--green);text-transform:uppercase;letter-spacing:1px}
+.parlay-pct{font-size:2rem;font-weight:800;font-family:'DM Mono',monospace;color:var(--green)}
+.parlay-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem}
+.parlay-item label{font-size:0.65rem;font-family:'DM Mono',monospace;color:var(--dim);display:block;margin-bottom:2px;text-transform:uppercase;letter-spacing:0.5px}
+.parlay-item span{font-size:0.8rem;color:var(--text);font-weight:600}
+.parlay-note{font-size:0.78rem;color:var(--muted);font-style:italic}
+.save-bet-btn{width:100%;padding:0.8rem;border-radius:10px;border:1px solid var(--border2);background:var(--green2);color:var(--green);font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:0.75rem}
+.save-bet-btn:hover{background:var(--green);color:#08090d}
+.new-analysis-btn{width:100%;padding:0.8rem;border-radius:10px;border:1px solid var(--border);background:none;color:var(--muted);font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.new-analysis-btn:hover{border-color:var(--text);color:var(--text)}
+
+/* HISTORY TAB */
+.history-list{display:flex;flex-direction:column;gap:0.75rem}
+.history-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.history-info{flex:1}
+.history-sport{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.history-grade{font-size:0.9rem;font-weight:700}
+.history-date{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--dim)}
+.history-pct{font-family:'DM Mono',monospace;font-size:1.2rem;font-weight:700}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:1rem;opacity:0.4}
+.empty-text{font-size:0.88rem}
+
+/* TRACKER TAB */
+.tracker-list{display:flex;flex-direction:column;gap:0.75rem}
+.tracker-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
+.tracker-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;gap:1rem;flex-wrap:wrap}
+.tracker-title{font-size:0.9rem;font-weight:700}
+.tracker-outcome{font-family:'DM Mono',monospace;font-size:0.72rem;padding:0.25rem 0.7rem;border-radius:20px}
+.outcome-pending{background:rgba(113,131,160,0.15);color:var(--muted)}
+.outcome-win{background:rgba(31,241,143,0.12);color:var(--green)}
+.outcome-loss{background:rgba(255,107,107,0.1);color:#ff6b6b}
+.tracker-meta{font-size:0.75rem;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:0.75rem}
+.tracker-actions{display:flex;gap:0.5rem}
+.outcome-btn{padding:0.35rem 0.9rem;border-radius:8px;border:1px solid var(--border);background:none;font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.outcome-btn.win{color:var(--green);border-color:var(--border2)}
+.outcome-btn.win:hover{background:var(--green2)}
+.outcome-btn.loss{color:#ff6b6b;border-color:rgba(255,107,107,0.3)}
+.outcome-btn.loss:hover{background:rgba(255,107,107,0.08)}
+
+/* PRICING PAGE */
+.pricing-wrap{max-width:900px;margin:0 auto;padding:3rem 2rem}
+.pricing-header{text-align:center;margin-bottom:3rem}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem}
+.plan-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2rem;position:relative;transition:all 0.3s}
+.plan-card.featured{border-color:var(--green);background:var(--bg3)}
+.plan-card.featured::before{content:'MOST POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--green);color:#08090d;font-size:0.62rem;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:1px;padding:0.25rem 0.8rem;border-radius:20px}
+.plan-name{font-size:0.75rem;font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:0.5rem}
+.plan-price{font-size:2.5rem;font-weight:800;color:var(--text);margin-bottom:0.25rem;line-height:1}
+.plan-price span{font-size:1rem;font-weight:400;color:var(--muted)}
+.plan-period{font-size:0.75rem;color:var(--dim);font-family:'DM Mono',monospace;margin-bottom:1.5rem}
+.plan-features{list-style:none;margin-bottom:2rem}
+.plan-features li{font-size:0.83rem;color:var(--muted);padding:0.4rem 0;display:flex;align-items:center;gap:0.6rem;border-bottom:1px solid var(--border)}
+.plan-features li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.plan-features li:last-child{border-bottom:none}
+.plan-btn{width:100%;padding:0.85rem;border-radius:10px;font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;border:none;transition:all 0.2s}
+.plan-btn.current{background:var(--bg3);color:var(--muted);border:1px solid var(--border);cursor:default}
+.plan-btn.upgrade-green{background:var(--green);color:#08090d}
+.plan-btn.upgrade-green:hover{opacity:0.88}
+.plan-btn.upgrade-outline{background:none;color:var(--text);border:1px solid var(--border)}
+.plan-btn.upgrade-outline:hover{border-color:var(--green);color:var(--green)}
+
+/* LIMIT WARNING */
+.limit-warning{background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:none}
+.limit-warning.show{display:block}
+.limit-text{font-size:0.82rem;color:#ff6b6b;margin-bottom:0.5rem}
+.limit-upgrade{font-size:0.78rem;color:var(--muted)}
+.limit-upgrade a{color:var(--green);cursor:pointer;text-decoration:none}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:0.75rem 1.25rem;font-size:0.82rem;color:var(--text);z-index:999;transform:translateY(100px);opacity:0;transition:all 0.3s;max-width:300px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.green{border-color:var(--border2);color:var(--green)}
+.toast.error{border-color:rgba(255,107,107,0.3);color:#ff6b6b}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  nav{padding:1rem 1.25rem}
+  .nav-links{display:none}
+  .hero h1{font-size:2.5rem}
+  .stats-row{gap:1.5rem}
+  .dashboard{padding:1rem}
+  .result-summary{padding-left:0;padding-top:1rem}
+  .bet-card-top{flex-direction:column}
+  .bet-prob{text-align:left}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">›Bet<span>IQ</span></div>
+  <div class="nav-links">
+    <a href="#" onclick="showPage('home')">Home</a>
+    <a href="#" onclick="showPage('pricing')">Pricing</a>
+  </div>
+  <div class="nav-right">
+    <div id="guest-nav" style="display:flex;gap:0.75rem">
+      <button class="btn-ghost" onclick="showPage('auth')">Log in</button>
+      <button class="btn-green" onclick="showPage('auth')">Get started</button>
+    </div>
+    <div id="user-nav">
+      <span class="credit-badge mono" id="nav-credits"></span>
+      <button class="btn-ghost" onclick="showPage('dashboard')">Dashboard</button>
+      <button class="btn-ghost" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HOME PAGE ══ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-badge">AI-Powered Bet Analysis</div>
+    <h1>
+      <span class="dim-text">Stop Guessing.</span>
+      <span class="green-text">Start Winning.</span>
+    </h1>
+    <p class="hero-sub">Upload your bet slip. BetIQ's AI reads every leg, pulls <strong>real player stats</strong>, and tells you the <strong>exact probability</strong> of hitting — before you lock it in.</p>
+    <div class="hero-ctas">
+      <button class="btn-big green" onclick="showPage('auth')">Start Analyzing Free →</button>
+      <button class="btn-big outline" onclick="showPage('pricing')">See Pricing</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-num">6+</div><div class="stat-label">Sports Covered</div></div>
+      <div class="stat-item"><div class="stat-num">&lt;5s</div><div class="stat-label">Analysis Time</div></div>
+      <div class="stat-item"><div class="stat-num">EV</div><div class="stat-label">Rated Every Bet</div></div>
+      <div class="stat-item"><div class="stat-num">A–F</div><div class="stat-label">Grade Every Slip</div></div>
+    </div>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker">
+      <span class="ticker-item">NBA Analysis</span><span class="ticker-item">NFL Props</span><span class="ticker-item">MLB Lines</span><span class="ticker-item">NHL Bets</span><span class="ticker-item">AI Powered</span><span class="ticker-item">EV Calculator</span><span class="ticker-item">Screenshot Upload</span><span class="ticker-item">Parlay Analysis</span><span class="ticker-item">Hit Probability</span><span class="ticker-item">UFC Fights</span><span class="ticker-item">NBA Analysis</span><span class="ticker-item">NFL Props</span><span class="ticker-item">MLB Lines</span><span class="ticker-item">NHL Bets</span><span class="ticker-item">AI Powered</span><span class="ticker-item">EV Calculator</span><span class="ticker-item">Screenshot Upload</span><span class="ticker-item">Parlay Analysis</span><span class="ticker-item">Hit Probability</span><span class="ticker-item">UFC Fights</span>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="section-label">// Features</div>
+    <div class="section-title">Everything You Need<br><span class="dim">To Bet Smarter.</span></div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">📸</div><div class="feature-name">SCREENSHOT UPLOAD</div><div class="feature-desc">Drop any bet slip image. AI reads every player, line, and odd automatically — no typing required.</div></div>
+      <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-name">HIT PROBABILITY %</div><div class="feature-desc">Get a precise probability for every leg based on season stats, last 10 games, and matchup history.</div></div>
+      <div class="feature-card"><div class="feature-icon">💰</div><div class="feature-name">EV ANALYSIS</div><div class="feature-desc">See if the sportsbook is giving you value or taking it. Every bet rated +EV or -EV instantly.</div></div>
+      <div class="feature-card"><div class="feature-icon">🔗</div><div class="feature-name">PARLAY CALCULATOR</div><div class="feature-desc">Real combined probability across all legs — not marketing odds. See your actual chance of winning.</div></div>
+      <div class="feature-card"><div class="feature-icon">📈</div><div class="feature-name">BET TRACKER</div><div class="feature-desc">Save every bet, mark wins and losses, and track your ROI over time to see what works.</div></div>
+      <div class="feature-card"><div class="feature-icon">🏆</div><div class="feature-name">6+ SPORTS</div><div class="feature-desc">NBA, NFL, MLB, NHL, Soccer, UFC, Tennis — year-round coverage, never an offseason.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AUTH PAGE ══ -->
+<div id="page-auth" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">›Bet<span>IQ</span></div>
+      <div class="auth-sub">Your AI betting analyst — sign in to start.</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Log in</button>
+        <button class="auth-tab" onclick="switchAuthTab('signup')">Sign up</button>
+      </div>
+      <div id="auth-login">
+        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="login-email" placeholder="you@example.com"></div>
+        <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="login-password" placeholder="••••••••"></div>
+        <button class="btn-full green" onclick="doLogin()" id="login-btn">Log in</button>
+        <div class="auth-msg" id="login-msg"></div>
+      </div>
+      <div id="auth-signup" style="display:none">
+        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="signup-email" placeholder="you@example.com"></div>
+        <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="signup-password" placeholder="Min 6 characters"></div>
+        <button class="btn-full green" onclick="doSignup()" id="signup-btn">Create account</button>
+        <div class="auth-msg" id="signup-msg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="page-dashboard" class="page">
+  <div class="dashboard">
+    <div class="dash-header">
+      <div>
+        <div class="dash-title">Dashboard</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:2px" id="dash-welcome"></div>
+      </div>
+      <span class="plan-badge plan-free" id="dash-plan-badge">FREE</span>
+    </div>
+
+    <div class="limit-warning" id="limit-warning">
+      <div class="limit-text">Daily limit reached for your plan.</div>
+      <div class="limit-upgrade">Upgrade to Pro for 999 analyses/day. <a onclick="showPage('pricing')">See plans →</a></div>
+    </div>
+
+    <div class="dash-nav">
+      <button class="dash-tab active" onclick="switchDashTab('analyze')">Analyze</button>
+      <button class="dash-tab" onclick="switchDashTab('history')">History</button>
+      <button class="dash-tab" onclick="switchDashTab('tracker')">Tracker</button>
+    </div>
+
+    <!-- ANALYZE -->
+    <div class="analyze-section active" id="tab-analyze">
+      <div class="input-mode-tabs">
+        <button class="mode-tab active" onclick="switchMode('upload')">📸 Upload Slip</button>
+        <button class="mode-tab" onclick="switchMode('text')">✏️ Type It</button>
+        <button class="mode-tab" onclick="switchMode('manual')">➕ Add Legs</button>
+      </div>
+
+      <div id="mode-upload">
+        <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <div class="upload-icon">📷</div>
+          <div class="upload-title">Drop your bet slip here</div>
+          <div class="upload-sub">PNG · JPG · PDF — click or drag & drop</div>
+          <input type="file" id="file-input" accept="image/*,.pdf">
+        </div>
+        <div class="uploaded-file" id="uploaded-file">
+          <span>📄</span><span class="uploaded-name" id="uploaded-name"></span>
+        </div>
+      </div>
+
+      <div id="mode-text" style="display:none">
+        <textarea class="context-input" id="bet-text-input" style="min-height:140px" placeholder="e.g. Parlay: LeBron James over 27.5 pts + Luka Doncic over 8.5 assists + Lakers ML vs Nuggets"></textarea>
+      </div>
+
+      <div id="mode-manual" style="display:none">
+        <div id="manual-legs"></div>
+        <button onclick="addLeg()" style="background:none;border:1px dashed var(--border);color:var(--muted);padding:0.6rem 1.2rem;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:600;width:100%;margin-bottom:0.5rem;transition:all 0.2s" onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">+ Add leg</button>
+      </div>
+
+      <div style="margin-top:1rem">
+        <select class="sport-select" id="sport-select">
+          <option value="">Select sport (optional)</option>
+          <option>NBA</option><option>NFL</option><option>MLB</option><option>NHL</option><option>Soccer</option><option>UFC</option><option>Tennis</option>
+        </select>
+        <textarea class="context-input" id="context-input" placeholder="Any extra context? e.g. 'This is a same-game parlay on FanDuel'" rows="2"></textarea>
+      </div>
+
+      <button class="analyze-btn" id="analyze-btn" onclick="runAnalysis()">Analyze My Slip →</button>
+
+      <div class="loading-state" id="loading-state">
+        <div class="loading-spinner"></div>
+        <div style="font-size:0.95rem;font-weight:700;margin-bottom:0.5rem">Running AI Analysis...</div>
+        <div class="loading-steps-list" id="loading-steps-list">
+          <div class="loading-step" id="ls1">Parsing bet slip</div>
+          <div class="loading-step" id="ls2">Pulling player stats</div>
+          <div class="loading-step" id="ls3">Checking matchups</div>
+          <div class="loading-step" id="ls4">Calculating probabilities</div>
+          <div class="loading-step" id="ls5">Generating report</div>
+        </div>
+      </div>
+
+      <div class="results-state" id="results-state"></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="analyze-section" id="tab-history">
+      <div class="history-list" id="history-list">
+        <div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No analyses yet. Run your first one!</div></div>
+      </div>
+    </div>
+
+    <!-- TRACKER -->
+    <div class="analyze-section" id="tab-tracker">
+      <div class="tracker-list" id="tracker-list">
+        <div class="empty-state"><div class="empty-icon">📈</div><div class="empty-text">No bets tracked yet. Save one from your analysis!</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRICING PAGE ══ -->
+<div id="page-pricing" class="page">
+  <div class="pricing-wrap">
+    <div class="pricing-header">
+      <div class="section-label" style="text-align:center">// Pricing</div>
+      <div class="section-title" style="text-align:center">Simple, Honest Pricing</div>
+      <p style="color:var(--muted);font-size:0.88rem;margin-top:0.75rem">Start free. Upgrade when you're ready.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="plan-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0<span>/mo</span></div>
+        <div class="plan-period">Forever free</div>
+        <ul class="plan-features">
+          <li>3 analyses per day</li>
+          <li>All 6+ sports</li>
+          <li>Bet tracker</li>
+          <li>Analysis history</li>
+        </ul>
+        <button class="plan-btn current" id="plan-btn-free">Current plan</button>
+      </div>
+      <div class="plan-card featured">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$9.99<span>/mo</span></div>
+        <div class="plan-period">Billed monthly</div>
+        <ul class="plan-features">
+          <li>999 analyses per day</li>
+          <li>All 6+ sports</li>
+          <li>Priority AI model</li>
+          <li>Full history & tracker</li>
+          <li>EV analysis</li>
+        </ul>
+        <button class="plan-btn upgrade-green" onclick="subscribe('pro')" id="plan-btn-pro">Upgrade to Pro</button>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">Sharp</div>
+        <div class="plan-price">$24.99<span>/mo</span></div>
+        <div class="plan-period">Billed monthly</div>
+        <ul class="plan-features">
+          <li>Unlimited analyses</li>
+          <li>All 6+ sports</li>
+          <li>Priority AI model</li>
+          <li>Full history & tracker</li>
+          <li>EV analysis</li>
+          <li>Early access to features</li>
+        </ul>
+        <button class="plan-btn upgrade-outline" onclick="subscribe('sharp')" id="plan-btn-sharp">Upgrade to Sharp</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ CONFIG — REPLACE THESE WITH YOUR REAL VALUES ══
+const SUPABASE_URL = 'https://qjteroaaqsznbwdpsjuh.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqdGVyb2FhcXN6bmJ3ZHBzanVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDc2MjcsImV4cCI6MjA5MTY4MzYyN30.t6GYf4YaZvkoxk4_9n5tFOEA-0qNWyuAab1l0dosKMg';
+const API_BASE = 'https://betiq-backend-production-e425.up.railway.app';
+
+// ── INIT ──
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let currentPlan = 'free';
+let currentResult = null;
+let uploadedFile = null;
+let inputMode = 'upload';
+let manualLegCount = 0;
+
+// ── PAGE ROUTING ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── AUTH STATE ──
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    document.getElementById('guest-nav').style.display = 'none';
+    document.getElementById('user-nav').style.display = 'flex';
+    await loadMe();
+    if (window.location.hash === '#dashboard') showPage('dashboard');
+  } else {
+    currentUser = null;
+    document.getElementById('guest-nav').style.display = 'flex';
+    document.getElementById('user-nav').style.display = 'none';
+  }
+});
+
+async function loadMe() {
+  try {
+    const token = (await sb.auth.getSession()).data.session?.access_token;
+    const r = await fetch(API_BASE + '/api/me', { headers: { Authorization: 'Bearer ' + token } });
+    const d = await r.json();
+    currentPlan = d.plan;
+    const remaining = d.analyses_remaining;
+    document.getElementById('nav-credits').textContent = remaining + ' left today';
+    document.getElementById('dash-welcome').textContent = currentUser.email;
+    const badge = document.getElementById('dash-plan-badge');
+    badge.textContent = d.plan.toUpperCase();
+    badge.className = 'plan-badge plan-' + d.plan;
+    if (remaining === 0) document.getElementById('limit-warning').classList.add('show');
+    else document.getElementById('limit-warning').classList.remove('show');
+    updatePricingButtons(d.plan);
+  } catch(e) { console.error(e); }
+}
+
+function updatePricingButtons(plan) {
+  document.getElementById('plan-btn-free').textContent = plan === 'free' ? 'Current plan' : 'Downgrade';
+  document.getElementById('plan-btn-free').className = 'plan-btn ' + (plan === 'free' ? 'current' : 'upgrade-outline');
+  document.getElementById('plan-btn-pro').textContent = plan === 'pro' ? 'Current plan' : 'Upgrade to Pro';
+  document.getElementById('plan-btn-pro').className = 'plan-btn ' + (plan === 'pro' ? 'current' : 'upgrade-green');
+  document.getElementById('plan-btn-sharp').textContent = plan === 'sharp' ? 'Current plan' : 'Upgrade to Sharp';
+}
+
+// ── AUTH ACTIONS ──
+function switchAuthTab(tab) {
+  document.getElementById('auth-login').style.display = tab === 'login' ? '' : 'none';
+  document.getElementById('auth-signup').style.display = tab === 'signup' ? '' : 'none';
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='signup')));
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const pw = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const msg = document.getElementById('login-msg');
+  btn.disabled = true; btn.textContent = 'Logging in...';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  btn.disabled = false; btn.textContent = 'Log in';
+  if (error) { msg.textContent = error.message; msg.className = 'auth-msg error'; }
+  else { showPage('dashboard'); loadHistory(); loadTracker(); }
+}
+
+async function doSignup() {
+  const email = document.getElementById('signup-email').value;
+  const pw = document.getElementById('signup-password').value;
+  const btn = document.getElementById('signup-btn');
+  const msg = document.getElementById('signup-msg');
+  btn.disabled = true; btn.textContent = 'Creating account...';
+  const { error } = await sb.auth.signUp({ email, password: pw });
+  btn.disabled = false; btn.textContent = 'Create account';
+  if (error) { msg.textContent = error.message; msg.className = 'auth-msg error'; }
+  else { msg.textContent = 'Account created! Check your email to confirm, then log in.'; msg.className = 'auth-msg success'; }
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  showPage('home');
+}
+
+// ── DASHBOARD TABS ──
+function switchDashTab(tab) {
+  document.querySelectorAll('.analyze-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.dash-tab').forEach((t,i) => {
+    const tabs = ['analyze','history','tracker'];
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  if (tab === 'history') loadHistory();
+  if (tab === 'tracker') loadTracker();
+}
+
+// ── INPUT MODES ──
+function switchMode(mode) {
+  inputMode = mode;
+  ['upload','text','manual'].forEach(m => document.getElementById('mode-'+m).style.display = m === mode ? '' : 'none');
+  document.querySelectorAll('.mode-tab').forEach((t,i) => t.classList.toggle('active', ['upload','text','manual'][i] === mode));
+}
+
+// ── FILE UPLOAD ──
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
+function setFile(f) { uploadedFile = f; document.getElementById('uploaded-name').textContent = f.name; document.getElementById('uploaded-file').classList.add('show'); }
+
+// ── MANUAL LEGS ──
+function addLeg() {
+  manualLegCount++;
+  const id = 'leg-' + manualLegCount;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center';
+  div.innerHTML = `<input type="text" class="context-input" id="${id}" placeholder="e.g. LeBron James Over 27.5 Points (-115)" style="min-height:auto;padding:0.65rem 1rem;flex:1"><button onclick="this.parentElement.remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:0.65rem 0.8rem;border-radius:8px;cursor:pointer;flex-shrink:0;font-size:1rem">×</button>`;
+  document.getElementById('manual-legs').appendChild(div);
+}
+
+// ── ANALYZE ──
+async function runAnalysis() {
+  if (!currentUser) { showPage('auth'); return; }
+  const token = (await sb.auth.getSession()).data.session?.access_token;
+  const sport = document.getElementById('sport-select').value;
+  const context = document.getElementById('context-input').value;
+
+  const formData = new FormData();
+  formData.append('sport', sport);
+  formData.append('context', context);
+  formData.append('inputMode', inputMode);
+
+  if (inputMode === 'upload') {
+    if (!uploadedFile) { showToast('Please upload a bet slip image.', 'error'); return; }
+    formData.append('image', uploadedFile);
+  } else if (inputMode === 'text') {
+    const txt = document.getElementById('bet-text-input').value.trim();
+    if (!txt) { showToast('Please describe your bet.', 'error'); return; }
+    formData.append('betText', txt);
+  } else {
+    const legs = [];
+    document.querySelectorAll('#manual-legs input').forEach(i => { if (i.value.trim()) legs.push(i.value.trim()); });
+    if (!legs.length) { showToast('Please add at least one leg.', 'error'); return; }
+    formData.append('manualLegs', JSON.stringify(legs));
+  }
+
+  document.getElementById('analyze-btn').style.display = 'none';
+  document.getElementById('loading-state').classList.add('show');
+  document.getElementById('results-state').classList.remove('show');
+
+  const steps = ['ls1','ls2','ls3','ls4','ls5'];
+  let si = 0;
+  const stepTimer = setInterval(() => { if (si < steps.length) { document.getElementById(steps[si]).classList.add('done'); si++; } }, 700);
+
+  try {
+    const resp = await fetch(API_BASE + '/api/analyze', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token },
+      body: formData
+    });
+    clearInterval(stepTimer);
+    steps.forEach(s => document.getElementById(s).classList.remove('done'));
+
+    if (resp.status === 429) {
+      document.getElementById('limit-warning').classList.add('show');
+      document.getElementById('loading-state').classList.remove('show');
+      document.getElementById('analyze-btn').style.display = '';
+      showToast('Daily limit reached. Upgrade your plan!', 'error');
+      return;
+    }
+
+    const data = await resp.json();
+    if (!data.success) throw new Error(data.error);
+    currentResult = data.data;
+    await loadMe();
+    renderResults(data.data);
+  } catch(e) {
+    clearInterval(stepTimer);
+    steps.forEach(s => document.getElementById(s).classList.remove('done'));
+    document.getElementById('loading-state').classList.remove('show');
+    document.getElementById('analyze-btn').style.display = '';
+    showToast('Analysis failed: ' + e.message, 'error');
+  }
+}
+
+function renderResults(r) {
+  document.getElementById('loading-state').classList.remove('show');
+  const container = document.getElementById('results-state');
+  container.classList.add('show');
+
+  const pct = r.parlay?.combined_probability || r.overall_probability || 0;
+  const gradeColor = r.grade === 'A' || r.grade === 'B' ? 'var(--green)' : r.grade === 'C' ? '#f0b429' : '#ff6b6b';
+  const evCls = (r.ev_summary || '').includes('+') ? 'pos' : 'neg';
+  const riskCls = (r.risk_level||'').toLowerCase().includes('low') ? 'pos' : (r.risk_level||'').toLowerCase().includes('high') ? 'neg' : 'neu';
+
+  let betsHtml = (r.bets || []).map(b => {
+    const p = b.probability || 0;
+    const pc = p >= 65 ? 'prob-high fill-high' : p >= 45 ? 'prob-mid fill-mid' : 'prob-low fill-low';
+    const statsHtml = (b.stats || []).map(s => `<div class="stat-box"><div class="stat-box-label">${s.label}</div><div class="stat-box-val">${s.value}</div></div>`).join('');
+    const factorsHtml = (b.factors || []).map(f => `<div class="factor ${f.type}"><span class="factor-dot">${f.type==='pos'?'↑':f.type==='neg'?'↓':'→'}</span>${f.text}</div>`).join('');
+    const evClass = (b.ev||'').includes('+') ? 'pos' : 'neg';
+    return `<div class="bet-card">
+      <div class="bet-card-top">
+        <div><div class="bet-player">${b.player_name||'—'}</div><div class="bet-team">${b.team||''}</div></div>
+        <div class="bet-prob"><div class="prob-num ${pc.split(' ')[0]}">${p}%</div><div class="prob-label">${b.confidence||'confidence'}</div></div>
+      </div>
+      <div><span class="bet-line-text">${b.bet_line||''}</span></div>
+      <div class="prob-bar"><div class="prob-fill ${pc.split(' ')[1]}" style="width:${p}%"></div></div>
+      <div class="bet-insight">${b.insight||''}</div>
+      ${statsHtml ? `<div class="bet-stats">${statsHtml}</div>` : ''}
+      <div class="factors">${factorsHtml}</div>
+      <div style="margin-top:0.75rem"><span class="meta-pill ${evClass}">${b.ev||''}</span></div>
+    </div>`;
+  }).join('');
+
+  const parlayHtml = r.parlay ? `<div class="parlay-summary">
+    <div class="parlay-top"><div class="parlay-title">Parlay Summary</div><div class="parlay-pct">${r.parlay.combined_probability}%</div></div>
+    <div class="parlay-grid">
+      <div class="parlay-item"><label>Strongest Leg</label><span>${r.parlay.strongest_leg||'—'}</span></div>
+      <div class="parlay-item"><label>Weakest Leg</label><span>${r.parlay.weakest_leg||'—'}</span></div>
+    </div>
+    ${r.parlay.risk_note ? `<div class="parlay-note">${r.parlay.risk_note}</div>` : ''}
+  </div>` : '';
+
+  container.innerHTML = `
+    <div class="result-top">
+      <div class="grade-circle" style="border-color:${gradeColor};background:rgba(31,241,143,0.06)">
+        <div class="grade-letter" style="color:${gradeColor}">${r.grade||'?'}</div>
+        <div class="grade-title-sm" style="color:${gradeColor}">${r.grade_title||''}</div>
+      </div>
+      <div class="result-summary">
+        <div class="result-verdict">${r.overall_verdict||''}</div>
+        <div class="result-meta">
+          <span class="meta-pill ${evCls}">${r.ev_summary||''} — ${r.ev_label||''}</span>
+          <span class="meta-pill ${riskCls}">Risk: ${r.risk_level||''}</span>
+          <span class="meta-pill neu">Hit prob: ${r.overall_probability||pct}%</span>
+        </div>
+      </div>
+    </div>
+    ${parlayHtml}
+    <div class="bet-cards">${betsHtml}</div>
+    <button class="save-bet-btn" onclick="saveBet()">Save to Tracker →</button>
+    <button class="new-analysis-btn" onclick="resetAnalysis()">New Analysis</button>
+  `;
+}
+
+function resetAnalysis() {
+  document.getElementById('results-state').classList.remove('show');
+  document.getElementById('results-state').innerHTML = '';
+  document.getElementById('analyze-btn').style.display = '';
+  document.getElementById('loading-state').classList.remove('show');
+  uploadedFile = null;
+  document.getElementById('uploaded-file').classList.remove('show');
+  document.getElementById('bet-text-input').value = '';
+  document.querySelectorAll('.loading-step').forEach(s => s.classList.remove('done'));
+  currentResult = null;
+}
+
+// ── SAVE TO TRACKER ──
+async function saveBet() {
+  if (!currentResult) return;
+  const token = (await sb.auth.getSession()).data.session?.access_token;
+  const r = currentResult;
+  const title = r.bets?.map(b => b.player_name).join(' + ') || 'Slip';
+  try {
+    await fetch(API_BASE + '/api/tracker', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, sport: document.getElementById('sport-select').value, grade: r.grade, probability: r.overall_probability, bet_line: r.bets?.[0]?.bet_line || '' })
+    });
+    showToast('Bet saved to tracker!', 'green');
+  } catch(e) { showToast('Could not save bet.', 'error'); }
+}
+
+// ── HISTORY ──
+async function loadHistory() {
+  if (!currentUser) return;
+  const token = (await sb.auth.getSession()).data.session?.access_token;
+  const r = await fetch(API_BASE + '/api/history', { headers: { Authorization: 'Bearer ' + token } });
+  const d = await r.json();
+  const list = document.getElementById('history-list');
+  if (!d.history?.length) { list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No analyses yet. Run your first one!</div></div>'; return; }
+  list.innerHTML = d.history.map(h => {
+    const res = h.result;
+    const pct = res?.overall_probability || res?.parlay?.combined_probability || 0;
+    const pc = pct >= 65 ? 'prob-high' : pct >= 45 ? 'prob-mid' : 'prob-low';
+    const date = new Date(h.created_at).toLocaleDateString();
+    return `<div class="history-card">
+      <div class="history-info"><div class="history-sport">${h.sport||'SPORT'}</div><div class="history-grade">${res?.grade||'?'} — ${res?.grade_title||'Analysis'}</div></div>
+      <div><div class="history-pct ${pc}">${pct}%</div><div class="history-date">${date}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── TRACKER ──
+async function loadTracker() {
+  if (!currentUser) return;
+  const token = (await sb.auth.getSession()).data.session?.access_token;
+  const r = await fetch(API_BASE + '/api/tracker', { headers: { Authorization: 'Bearer ' + token } });
+  const d = await r.json();
+  const list = document.getElementById('tracker-list');
+  if (!d.bets?.length) { list.innerHTML = '<div class="empty-state"><div class="empty-icon">📈</div><div class="empty-text">No bets tracked yet. Save one from your analysis!</div></div>'; return; }
+  list.innerHTML = d.bets.map(b => `<div class="tracker-card">
+    <div class="tracker-top">
+      <div class="tracker-title">${b.title||'Bet'}</div>
+      <span class="tracker-outcome outcome-${b.outcome}">${b.outcome.toUpperCase()}</span>
+    </div>
+    <div class="tracker-meta">${b.sport||''} · Grade ${b.grade||'?'} · ${b.probability||0}% probability · ${new Date(b.created_at).toLocaleDateString()}</div>
+    ${b.outcome === 'pending' ? `<div class="tracker-actions"><button class="outcome-btn win" onclick="updateOutcome('${b.id}','win')">✓ Win</button><button class="outcome-btn loss" onclick="updateOutcome('${b.id}','loss')">✗ Loss</button></div>` : ''}
+  </div>`).join('');
+}
+
+async function updateOutcome(id, outcome) {
+  const token = (await sb.auth.getSession()).data.session?.access_token;
+  await fetch(API_BASE + '/api/tracker/' + id, {
+    method: 'PATCH',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ outcome })
+  });
+  showToast('Bet marked as ' + outcome + '!', 'green');
+  loadTracker();
+}
+
+// ── SUBSCRIBE ──
+async function subscribe(plan) {
+  if (!currentUser) { showPage('auth'); return; }
+  const token = (await sb.auth.getSession()).data.session?.access_token;
+  try {
+    const r = await fetch(API_BASE + '/api/subscribe', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan })
+    });
+    const d = await r.json();
+    if (d.url) window.location.href = d.url;
+    else showToast('Could not start checkout.', 'error');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// ── TOAST ──
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+// Check for ?upgraded=true from Stripe redirect
+if (window.location.search.includes('upgraded=true')) {
+  showToast('Plan upgraded successfully!', 'green');
+  showPage('dashboard');
+  history.replaceState({}, '', window.location.pathname);
+}
+</script>
+</body>
+</html>
