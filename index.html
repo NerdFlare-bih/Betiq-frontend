@@ -440,9 +440,22 @@
   let selectedFile = null;
 
   // ── AUTH STATE LISTENER ──
-  sb.auth.onAuthStateChange((event, session) => {
+  sb.auth.onAuthStateChange(async (event, session) => {
     currentSession = session;
     if (session) {
+      const plan = new URLSearchParams(window.location.search).get('plan');
+      if (plan && plan !== 'free') {
+        showDashboard(session);
+        try {
+          const res = await fetch(API_BASE + '/api/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+            body: JSON.stringify({ plan })
+          });
+          const data = await res.json();
+          if (data.url) { window.location.href = data.url; return; }
+        } catch (e) {}
+      }
       showDashboard(session);
     } else {
       showLanding();
