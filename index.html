@@ -1,763 +1,799 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BetIQ — AI-Powered Bet Analysis</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#08090d;--bg2:#0e1017;--bg3:#13151f;--green:#1ff18f;--green2:rgba(31,241,143,0.08);--text:#e3e9f6;--muted:#7183a0;--dim:#45546b;--border:rgba(113,131,160,0.15);--border2:rgba(31,241,143,0.2);--red:#ff6b6b;--red2:rgba(255,107,107,0.08)}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
-a{text-decoration:none;color:inherit}
-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid var(--border);background:rgba(8,9,13,0.95);backdrop-filter:blur(12px)}
-.logo{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;cursor:pointer}
-.logo span{color:var(--green)}
-.nav-links{display:flex;align-items:center;gap:1.5rem}
-.nav-links a{color:var(--muted);font-size:0.85rem;font-weight:600;cursor:pointer;transition:color 0.2s}
-.nav-links a:hover{color:var(--text)}
-.nav-right{display:flex;align-items:center;gap:0.75rem}
-.btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);padding:0.45rem 1rem;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:600;transition:all 0.2s}
-.btn-ghost:hover{border-color:var(--green);color:var(--green)}
-.btn-green{background:var(--green);border:none;color:#08090d;padding:0.45rem 1.1rem;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:700;transition:all 0.2s}
-.btn-green:hover{opacity:0.85}
-.credit-pill{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--green);background:var(--green2);border:1px solid var(--border2);padding:0.3rem 0.75rem;border-radius:20px}
-.page{display:none;min-height:100vh;padding-top:65px}
-.page.active{display:block}
-#page-home{padding-top:0}
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7rem 2rem 4rem;position:relative}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(31,241,143,0.05) 0%,transparent 70%);pointer-events:none}
-.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:var(--green2);border:1px solid var(--border2);color:var(--green);font-family:'DM Mono',monospace;font-size:0.7rem;padding:0.35rem 0.9rem;border-radius:20px;margin-bottom:2rem;letter-spacing:0.5px}
-.badge-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-h1.hero-title{font-size:clamp(3rem,8vw,5.5rem);font-weight:800;line-height:1;letter-spacing:-2px;margin-bottom:1.5rem}
-.hero-dim{color:rgba(227,233,246,0.2);display:block}
-.hero-green{color:var(--green);display:block}
-.hero-sub{font-size:0.95rem;color:var(--muted);max-width:500px;line-height:1.7;margin-bottom:2.5rem}
-.hero-sub strong{color:var(--text)}
-.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:4rem}
-.btn-big{padding:0.8rem 1.8rem;border-radius:10px;font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;border:none;transition:all 0.2s}
-.btn-big.g{background:var(--green);color:#08090d}
-.btn-big.g:hover{opacity:0.88;transform:translateY(-1px)}
-.btn-big.o{background:none;color:var(--text);border:1px solid var(--border)}
-.btn-big.o:hover{border-color:var(--green);color:var(--green)}
-.stats-row{display:flex;gap:3rem;justify-content:center;flex-wrap:wrap}
-.stat-item{text-align:center}
-.stat-num{font-size:2.2rem;font-weight:800;color:var(--green);line-height:1}
-.stat-lbl{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--dim);letter-spacing:1px;margin-top:4px;text-transform:uppercase}
-.ticker-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:0.7rem 0;background:var(--bg2)}
-.ticker{display:flex;white-space:nowrap;animation:tick 28s linear infinite}
-.t-item{font-family:'DM Mono',monospace;font-size:0.75rem;background:var(--green);color:#08090d;font-weight:500;margin-right:1rem;padding:0.25rem 0.9rem;border-radius:4px}
-@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.features{padding:5rem 2rem;max-width:1050px;margin:0 auto}
-.sec-label{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.75rem}
-.sec-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:0.5rem}
-.sec-title .dim{color:var(--dim)}
-.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;margin-top:2.5rem}
-.feat-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.75rem;transition:all 0.3s}
-.feat-card:hover{border-color:var(--border2);transform:translateY(-3px)}
-.feat-icon{font-size:1.6rem;margin-bottom:0.75rem}
-.feat-name{font-size:0.85rem;font-weight:700;margin-bottom:0.4rem}
-.feat-desc{font-size:0.8rem;color:var(--muted);line-height:1.6}
-.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
-.auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2.25rem;width:100%;max-width:400px}
-.auth-logo{font-size:1.4rem;font-weight:800;margin-bottom:0.4rem}
-.auth-logo span{color:var(--green)}
-.auth-tagline{font-size:0.8rem;color:var(--muted);margin-bottom:1.75rem}
-.tab-row{display:flex;background:var(--bg3);border-radius:10px;padding:3px;margin-bottom:1.5rem;gap:3px}
-.tab-btn{flex:1;padding:0.55rem;text-align:center;border-radius:8px;cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--muted);transition:all 0.2s;border:none;background:none;font-family:'Syne',sans-serif}
-.tab-btn.active{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
-.form-label{font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:0.35rem;display:block;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.5px}
-.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;color:var(--text);font-family:'Syne',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;margin-bottom:0.9rem}
-.form-input:focus{border-color:var(--green)}
-.form-input::placeholder{color:var(--dim)}
-.submit-btn{width:100%;padding:0.8rem;border-radius:10px;font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;border:none;background:var(--green);color:#08090d;transition:all 0.2s;margin-top:0.25rem}
-.submit-btn:hover{opacity:0.88}
-.submit-btn:disabled{opacity:0.4;cursor:not-allowed}
-.form-msg{font-size:0.78rem;margin-top:0.6rem;text-align:center;min-height:1.1rem;font-family:'DM Mono',monospace}
-.form-msg.err{color:var(--red)}
-.form-msg.ok{color:var(--green)}
-.dash-wrap{max-width:860px;margin:0 auto;padding:2rem 1.5rem}
-.dash-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem;flex-wrap:wrap;gap:1rem}
-.dash-title{font-size:1.4rem;font-weight:800}
-.dash-email{font-size:0.78rem;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
-.plan-tag{font-family:'DM Mono',monospace;font-size:0.7rem;padding:0.3rem 0.75rem;border-radius:20px;font-weight:500}
-.plan-free{background:rgba(113,131,160,0.12);color:var(--muted)}
-.plan-pro{background:var(--green2);color:var(--green);border:1px solid var(--border2)}
-.plan-sharp{background:rgba(255,215,0,0.08);color:#ffd700;border:1px solid rgba(255,215,0,0.25)}
-.dash-tabs{display:flex;gap:0.4rem;margin-bottom:1.75rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:4px}
-.dtab{flex:1;padding:0.55rem 0.9rem;border-radius:9px;border:none;background:none;color:var(--muted);font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center}
-.dtab.active{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
-.dsection{display:none}
-.dsection.active{display:block}
-.limit-bar{background:var(--red2);border:1px solid rgba(255,107,107,0.2);border-radius:12px;padding:0.9rem 1.1rem;margin-bottom:1.25rem;display:none}
-.limit-bar.show{display:block}
-.limit-txt{font-size:0.8rem;color:var(--red);margin-bottom:0.3rem}
-.limit-link{font-size:0.75rem;color:var(--muted);font-family:'DM Mono',monospace}
-.limit-link span{color:var(--green);cursor:pointer}
-.mode-tabs{display:flex;gap:0.4rem;margin-bottom:1.25rem;flex-wrap:wrap}
-.mtab{padding:0.45rem 1rem;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s}
-.mtab.active{background:var(--green2);border-color:var(--border2);color:var(--green)}
-.drop-zone{border:2px dashed var(--border);border-radius:14px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg2);margin-bottom:0.75rem}
-.drop-zone:hover,.drop-zone.drag{border-color:var(--green);background:var(--green2)}
-.dz-icon{font-size:2rem;margin-bottom:0.75rem}
-.dz-title{font-size:0.95rem;font-weight:700;margin-bottom:0.3rem}
-.dz-sub{font-size:0.75rem;color:var(--muted);font-family:'DM Mono',monospace}
-#file-inp{display:none}
-.file-chip{display:none;align-items:center;gap:0.6rem;background:var(--green2);border:1px solid var(--border2);border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.75rem;font-size:0.8rem;font-family:'DM Mono',monospace;color:var(--green)}
-.file-chip.show{display:flex}
-.textarea{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:0.75rem 0.9rem;color:var(--text);font-family:'DM Mono',monospace;font-size:0.8rem;outline:none;resize:vertical;transition:border-color 0.2s}
-.textarea:focus{border-color:var(--green)}
-.textarea::placeholder{color:var(--dim)}
-.sel{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;color:var(--text);font-family:'Syne',sans-serif;font-size:0.88rem;outline:none;cursor:pointer;margin-bottom:0.75rem}
-.sel:focus{border-color:var(--green)}
-.go-btn{width:100%;margin-top:1rem;padding:0.9rem;border-radius:12px;border:none;background:var(--green);color:#08090d;font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s}
-.go-btn:hover{opacity:0.88}
-.go-btn:disabled{opacity:0.4;cursor:not-allowed}
-.load-wrap{display:none;text-align:center;padding:2.5rem 1rem}
-.load-wrap.show{display:block}
-.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.25rem}
-@keyframes spin{to{transform:rotate(360deg)}}
-.load-title{font-size:0.9rem;font-weight:700;margin-bottom:1rem}
-.steps-list{display:flex;flex-direction:column;gap:0.4rem;max-width:260px;margin:0 auto}
-.step-item{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--dim);display:flex;align-items:center;gap:0.5rem;transition:color 0.3s}
-.step-item.done{color:var(--green)}
-.step-item::before{content:'○';flex-shrink:0}
-.step-item.done::before{content:'✓'}
-.res-wrap{display:none}
-.res-wrap.show{display:block}
-.grade-row{display:flex;align-items:center;gap:1.25rem;margin-bottom:1.25rem;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;flex-wrap:wrap}
-.grade-circle{width:72px;height:72px;border-radius:50%;border:3px solid var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--green2);flex-shrink:0}
-.grade-letter{font-size:1.8rem;font-weight:800;color:var(--green);line-height:1}
-.grade-sub{font-size:0.5rem;font-family:'DM Mono',monospace;color:var(--green);letter-spacing:0.5px}
-.grade-info{flex:1}
-.grade-verdict{font-size:0.88rem;color:var(--text);line-height:1.6;margin-bottom:0.6rem}
-.pills{display:flex;gap:0.5rem;flex-wrap:wrap}
-.pill{font-family:'DM Mono',monospace;font-size:0.68rem;padding:0.25rem 0.7rem;border-radius:20px;border:1px solid var(--border)}
-.pill.pos{background:var(--green2);color:var(--green);border-color:var(--border2)}
-.pill.neg{background:var(--red2);color:var(--red);border-color:rgba(255,107,107,0.2)}
-.pill.neu{background:var(--bg3);color:var(--muted)}
-.bet-list{display:flex;flex-direction:column;gap:0.9rem;margin-bottom:1.1rem}
-.bet-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.25rem}
-.bc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;gap:0.75rem}
-.bc-name{font-size:0.95rem;font-weight:700}
-.bc-team{font-size:0.7rem;font-family:'DM Mono',monospace;color:var(--muted);margin-top:2px}
-.bc-pct{font-size:1.6rem;font-weight:800;font-family:'DM Mono',monospace;line-height:1;text-align:right}
-.bc-conf{font-size:0.62rem;font-family:'DM Mono',monospace;color:var(--dim);text-transform:uppercase;letter-spacing:1px;text-align:right}
-.pct-high{color:var(--green)}
-.pct-mid{color:#f0b429}
-.pct-low{color:var(--red)}
-.bc-line{font-size:0.75rem;font-family:'DM Mono',monospace;color:var(--muted);background:var(--bg3);padding:0.3rem 0.7rem;border-radius:6px;display:inline-block;margin-bottom:0.7rem}
-.prob-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:0.8rem}
-.prob-fill{height:100%;border-radius:2px}
-.fill-h{background:var(--green)}
-.fill-m{background:#f0b429}
-.fill-l{background:var(--red)}
-.bc-insight{font-size:0.8rem;color:var(--muted);line-height:1.6;padding-left:0.75rem;border-left:2px solid var(--border2);margin-bottom:0.8rem}
-.bc-stats{display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-bottom:0.8rem}
-.stat-box{background:var(--bg3);border-radius:8px;padding:0.5rem 0.7rem}
-.sb-lbl{font-size:0.62rem;font-family:'DM Mono',monospace;color:var(--dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1px}
-.sb-val{font-size:0.82rem;font-weight:600}
-.factors{display:flex;flex-direction:column;gap:0.35rem}
-.factor{font-size:0.76rem;display:flex;gap:0.5rem;line-height:1.5}
-.factor.pos{color:var(--green)}
-.factor.neg{color:var(--red)}
-.factor.neu{color:var(--muted)}
-.parlay-box{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
-.pb-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.9rem}
-.pb-label{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--green);text-transform:uppercase;letter-spacing:1px}
-.pb-pct{font-size:1.8rem;font-weight:800;font-family:'DM Mono',monospace;color:var(--green)}
-.pb-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:0.6rem}
-.pb-item label{font-size:0.62rem;font-family:'DM Mono',monospace;color:var(--dim);display:block;margin-bottom:2px;text-transform:uppercase}
-.pb-item span{font-size:0.78rem;font-weight:600}
-.pb-note{font-size:0.76rem;color:var(--muted);font-style:italic}
-.action-btns{display:flex;flex-direction:column;gap:0.6rem}
-.save-btn{width:100%;padding:0.75rem;border-radius:10px;border:1px solid var(--border2);background:var(--green2);color:var(--green);font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s}
-.save-btn:hover{background:var(--green);color:#08090d}
-.reset-btn{width:100%;padding:0.75rem;border-radius:10px;border:1px solid var(--border);background:none;color:var(--muted);font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s}
-.reset-btn:hover{color:var(--text);border-color:var(--text)}
-.list-wrap{display:flex;flex-direction:column;gap:0.6rem}
-.h-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap}
-.h-sport{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
-.h-grade{font-size:0.88rem;font-weight:700}
-.h-date{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--dim);margin-top:2px}
-.h-pct{font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700}
-.t-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1rem 1.1rem}
-.tc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;flex-wrap:wrap;gap:0.5rem}
-.tc-title{font-size:0.88rem;font-weight:700}
-.outcome-tag{font-family:'DM Mono',monospace;font-size:0.68rem;padding:0.2rem 0.6rem;border-radius:20px}
-.ot-pending{background:rgba(113,131,160,0.12);color:var(--muted)}
-.ot-win{background:var(--green2);color:var(--green)}
-.ot-loss{background:var(--red2);color:var(--red)}
-.tc-meta{font-size:0.72rem;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:0.7rem}
-.tc-actions{display:flex;gap:0.4rem}
-.oc-btn{padding:0.3rem 0.8rem;border-radius:8px;border:1px solid var(--border);background:none;font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s}
-.oc-win{color:var(--green);border-color:var(--border2)}
-.oc-win:hover{background:var(--green2)}
-.oc-loss{color:var(--red);border-color:rgba(255,107,107,0.25)}
-.oc-loss:hover{background:var(--red2)}
-.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
-.empty-icon{font-size:2rem;opacity:0.35;margin-bottom:0.75rem}
-.empty-txt{font-size:0.85rem}
-.pricing-wrap{max-width:860px;margin:0 auto;padding:3rem 1.5rem}
-.pricing-hdr{text-align:center;margin-bottom:2.5rem}
-.pricing-hdr p{color:var(--muted);font-size:0.85rem;margin-top:0.5rem}
-.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem}
-.plan-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:1.75rem;position:relative}
-.plan-card.featured{border-color:var(--green)}
-.plan-card.featured::before{content:'MOST POPULAR';position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--green);color:#08090d;font-size:0.6rem;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:1px;padding:0.2rem 0.75rem;border-radius:20px}
-.pn{font-size:0.7rem;font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:0.4rem}
-.pp{font-size:2.2rem;font-weight:800;line-height:1;margin-bottom:0.2rem}
-.pp span{font-size:0.9rem;font-weight:400;color:var(--muted)}
-.pp-period{font-size:0.7rem;color:var(--dim);font-family:'DM Mono',monospace;margin-bottom:1.25rem}
-.pf{list-style:none;margin-bottom:1.75rem}
-.pf li{font-size:0.8rem;color:var(--muted);padding:0.35rem 0;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid var(--border)}
-.pf li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
-.pf li:last-child{border-bottom:none}
-.plan-btn{width:100%;padding:0.8rem;border-radius:10px;font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;border:none;transition:all 0.2s}
-.pb-curr{background:var(--bg3);color:var(--muted);border:1px solid var(--border);cursor:default}
-.pb-green{background:var(--green);color:#08090d}
-.pb-green:hover{opacity:0.88}
-.pb-outline{background:none;color:var(--text);border:1px solid var(--border)}
-.pb-outline:hover{border-color:var(--green);color:var(--green)}
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:0.7rem 1.1rem;font-size:0.8rem;z-index:999;transform:translateY(80px);opacity:0;transition:all 0.3s;max-width:280px;font-family:'DM Mono',monospace}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.g{border-color:var(--border2);color:var(--green)}
-.toast.r{border-color:rgba(255,107,107,0.3);color:var(--red)}
-@media(max-width:580px){nav{padding:0.9rem 1rem}.nav-links{display:none}.dash-wrap,.pricing-wrap{padding:1.25rem 1rem}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BetIQ — AI Sports Bet Analyzer</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #08090d;
+      --bg2: #0e1017;
+      --bg3: #13151e;
+      --green: #1ff18f;
+      --green-dim: rgba(31,241,143,0.12);
+      --text: #e3e9f6;
+      --muted: #7183a0;
+      --muted2: #45546b;
+      --danger: #ff5c5c;
+      --warn: #f5a623;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; min-height: 100vh; }
+
+    /* ── NAV ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 40px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: sticky; top: 0; background: rgba(8,9,13,0.92); backdrop-filter: blur(10px); z-index: 100;
+    }
+    .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .logo span { color: var(--green); }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; cursor: pointer; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-ghost { background: transparent; color: var(--muted); }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-primary { background: var(--green); color: #08090d; }
+    .btn-primary:hover { background: #17d47d; }
+    .btn-outline { background: transparent; color: var(--green); border: 1px solid var(--green); }
+    .btn-outline:hover { background: var(--green-dim); }
+    .btn-danger { background: var(--danger); color: white; }
+
+    /* ── HERO ── */
+    .hero { text-align: center; padding: 100px 24px 80px; max-width: 800px; margin: 0 auto; }
+    .hero-badge { display: inline-block; background: var(--green-dim); color: var(--green); font-size: 12px; font-weight: 600; letter-spacing: 1px; padding: 6px 14px; border-radius: 20px; margin-bottom: 28px; border: 1px solid rgba(31,241,143,0.2); }
+    .hero h1 { font-size: clamp(48px, 8vw, 80px); line-height: 1.05; font-weight: 800; letter-spacing: -2px; color: rgba(227,233,246,0.2); }
+    .hero h1 .highlight { color: var(--green); -webkit-text-stroke: 0px; }
+    .hero p { font-size: 17px; color: var(--muted); margin: 28px auto 40px; max-width: 560px; line-height: 1.7; }
+    .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── STATS ── */
+    .stats { display: flex; justify-content: center; gap: 60px; padding: 48px 24px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .stat-item { text-align: center; }
+    .stat-number { font-size: 40px; font-weight: 800; color: var(--green); letter-spacing: -1px; }
+    .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(--muted2); margin-top: 4px; }
+
+    /* ── TICKER ── */
+    .ticker-wrap { overflow: hidden; padding: 20px 0; background: var(--bg2); border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .ticker { display: flex; gap: 0; animation: ticker 30s linear infinite; white-space: nowrap; }
+    .ticker-item { padding: 4px 20px; background: var(--green); color: #08090d; font-size: 13px; font-weight: 700; margin-right: 12px; border-radius: 4px; }
+    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* ── FEATURES ── */
+    .features { padding: 80px 24px; max-width: 1100px; margin: 0 auto; }
+    .section-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; color: var(--green); margin-bottom: 16px; }
+    .section-title { font-size: 40px; font-weight: 800; line-height: 1.15; letter-spacing: -1px; }
+    .section-title .dim { color: var(--muted2); }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 48px; }
+    .feature-card { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 28px; }
+    .feature-icon { font-size: 28px; margin-bottom: 14px; }
+    .feature-title { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; color: var(--text); margin-bottom: 10px; }
+    .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 500; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--bg2); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 36px; width: 100%; max-width: 420px; margin: 20px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+    .modal-close:hover { color: var(--text); background: var(--bg3); }
+    .modal-logo { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
+    .modal-logo span { color: var(--green); }
+    .auth-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 28px; }
+    .auth-tab { flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
+    .auth-tab.active { color: var(--green); border-bottom-color: var(--green); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 7px; display: block; }
+    .form-input { width: 100%; background: var(--bg3); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .form-input:focus { border-color: var(--green); }
+    .form-input::placeholder { color: var(--muted2); }
+    .auth-error { background: rgba(255,92,92,0.1); border: 1px solid rgba(255,92,92,0.3); color: var(--danger); font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; display: none; }
+    .auth-success { background: rgba(31,241,143,0.1); border: 1px solid rgba(31,241,143,0.3); color: var(--green); font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; display: none; }
+    .btn-full { width: 100%; padding: 13px; font-size: 15px; border-radius: 10px; }
+    .auth-footer { text-align: center; margin-top: 16px; font-size: 13px; color: var(--muted); }
+    .auth-footer a { color: var(--green); cursor: pointer; text-decoration: none; }
+
+    /* ── DASHBOARD ── */
+    #dashboard { display: none; min-height: 100vh; }
+    .dash-nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 40px; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(8,9,13,0.92); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; }
+    .dash-user { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); }
+    .plan-badge { background: var(--green-dim); color: var(--green); font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(31,241,143,0.2); }
+    .credits-bar { font-size: 13px; color: var(--muted2); }
+    .credits-bar span { color: var(--green); font-weight: 700; }
+
+    .dash-body { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+    .dash-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .dash-subtitle { font-size: 14px; color: var(--muted); margin-bottom: 36px; }
+
+    /* ── ANALYZER FORM ── */
+    .analyzer-card { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 32px; margin-bottom: 32px; }
+    .input-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+    .input-tab { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); background: var(--bg3); color: var(--muted); transition: all 0.2s; }
+    .input-tab.active { background: var(--green-dim); color: var(--green); border-color: rgba(31,241,143,0.3); }
+    .input-panel { display: none; }
+    .input-panel.active { display: block; }
+    .upload-zone { border: 2px dashed rgba(255,255,255,0.1); border-radius: 14px; padding: 48px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--green); background: var(--green-dim); }
+    .upload-zone .upload-icon { font-size: 36px; margin-bottom: 12px; }
+    .upload-zone p { font-size: 14px; color: var(--muted); }
+    .upload-zone p strong { color: var(--text); }
+    .upload-zone input[type=file] { display: none; }
+    .uploaded-preview { margin-top: 14px; font-size: 13px; color: var(--green); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-select { width: 100%; background: var(--bg3); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; appearance: none; cursor: pointer; }
+    .form-select:focus { border-color: var(--green); }
+    .form-textarea { width: 100%; background: var(--bg3); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; resize: vertical; min-height: 120px; font-family: inherit; }
+    .form-textarea:focus { border-color: var(--green); }
+    .analyze-btn { width: 100%; padding: 15px; background: var(--green); color: #08090d; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+    .analyze-btn:hover { background: #17d47d; }
+    .analyze-btn:disabled { background: var(--muted2); cursor: not-allowed; }
+    .analyze-btn .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(8,9,13,0.4); border-top-color: #08090d; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESULTS ── */
+    #results { display: none; }
+    .result-header { display: flex; align-items: center; gap: 20px; background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px 32px; margin-bottom: 20px; }
+    .grade-circle { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; flex-shrink: 0; }
+    .grade-A { background: rgba(31,241,143,0.15); color: var(--green); border: 2px solid rgba(31,241,143,0.4); }
+    .grade-B { background: rgba(31,241,143,0.1); color: #a8f4c8; border: 2px solid rgba(168,244,200,0.3); }
+    .grade-C { background: rgba(245,166,35,0.1); color: var(--warn); border: 2px solid rgba(245,166,35,0.3); }
+    .grade-D { background: rgba(255,92,92,0.1); color: var(--danger); border: 2px solid rgba(255,92,92,0.2); }
+    .grade-F { background: rgba(255,92,92,0.15); color: var(--danger); border: 2px solid rgba(255,92,92,0.4); }
+    .result-summary h2 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .result-summary p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+    .result-pills { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .pill-green { background: rgba(31,241,143,0.12); color: var(--green); }
+    .pill-warn { background: rgba(245,166,35,0.12); color: var(--warn); }
+    .pill-red { background: rgba(255,92,92,0.12); color: var(--danger); }
+    .pill-blue { background: rgba(113,131,160,0.15); color: var(--muted); }
+
+    .bets-grid { display: grid; gap: 16px; }
+    .bet-card { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 24px; }
+    .bet-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+    .bet-player { font-size: 16px; font-weight: 700; }
+    .bet-team { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .bet-line-tag { font-size: 13px; color: var(--muted); }
+    .bet-prob { font-size: 28px; font-weight: 900; text-align: right; }
+    .bet-prob.high { color: var(--green); }
+    .bet-prob.mid { color: var(--warn); }
+    .bet-prob.low { color: var(--danger); }
+    .bet-prob small { font-size: 12px; font-weight: 400; color: var(--muted); display: block; }
+    .bet-insight { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 16px; }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .stat-chip { background: var(--bg3); border-radius: 8px; padding: 10px 12px; }
+    .stat-chip-label { font-size: 11px; color: var(--muted2); margin-bottom: 3px; }
+    .stat-chip-value { font-size: 14px; font-weight: 700; color: var(--text); }
+    .factors { display: flex; flex-direction: column; gap: 6px; }
+    .factor { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; }
+    .factor-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .factor-dot.pos { background: var(--green); }
+    .factor-dot.neg { background: var(--danger); }
+    .factor-dot.neu { background: var(--muted2); }
+
+    .parlay-summary { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 24px; margin-top: 16px; }
+    .parlay-title { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 14px; }
+    .parlay-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .parlay-item label { font-size: 11px; color: var(--muted2); display: block; margin-bottom: 4px; }
+    .parlay-item span { font-size: 14px; font-weight: 600; color: var(--text); }
+
+    /* ── HISTORY ── */
+    .history-section { margin-top: 40px; }
+    .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .history-title { font-size: 18px; font-weight: 700; }
+    .history-list { display: flex; flex-direction: column; gap: 10px; }
+    .history-item { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color 0.2s; }
+    .history-item:hover { border-color: rgba(255,255,255,0.15); }
+    .history-sport { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--muted2); margin-bottom: 4px; }
+    .history-date { font-size: 13px; color: var(--muted); }
+    .history-grade { font-size: 22px; font-weight: 900; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .dash-nav { padding: 14px 20px; }
+      .dash-body { padding: 24px 16px; }
+      .form-row { grid-template-columns: 1fr; }
+      .result-header { flex-direction: column; }
+      .stats { gap: 32px; }
+    }
+  </style>
 </head>
 <body>
-<nav>
-  <div class="logo" onclick="showPage('home')">›Bet<span>IQ</span></div>
-  <div class="nav-links">
-    <a onclick="showPage('home')">Home</a>
-    <a onclick="showPage('pricing')">Pricing</a>
-  </div>
-  <div class="nav-right" id="nav-guest">
-    <button class="btn-ghost" onclick="showPage('auth')">Log in</button>
-    <button class="btn-green" onclick="showPage('auth')">Get started</button>
-  </div>
-  <div class="nav-right" id="nav-user" style="display:none">
-    <span class="credit-pill" id="nav-credits">— left</span>
-    <button class="btn-ghost" onclick="showPage('dashboard')">Dashboard</button>
-    <button class="btn-ghost" onclick="doSignOut()">Sign out</button>
-  </div>
-</nav>
 
-<div id="page-home" class="page active">
-  <div class="hero">
-    <div class="hero-badge"><span class="badge-dot"></span>AI-Powered Bet Analysis</div>
-    <h1 class="hero-title"><span class="hero-dim">Stop Guessing.</span><span class="hero-green">Start Winning.</span></h1>
-    <p class="hero-sub">Upload your bet slip. BetIQ's AI reads every leg, pulls <strong>real player stats</strong>, and tells you the <strong>exact probability</strong> of hitting — before you lock it in.</p>
-    <div class="hero-btns">
-      <button class="btn-big g" onclick="showPage('auth')">Start Analyzing Free →</button>
-      <button class="btn-big o" onclick="showPage('pricing')">See Pricing</button>
+<!-- ─────────────────────────────────────────────── -->
+<!--  LANDING PAGE                                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div id="landing">
+  <nav>
+    <div class="logo">›Bet<span>IQ</span></div>
+    <div class="nav-links">
+      <a onclick="scrollTo(0,0)">Home</a>
+      <a onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Features</a>
+      <a>Pricing</a>
     </div>
-    <div class="stats-row">
-      <div class="stat-item"><div class="stat-num">6+</div><div class="stat-lbl">Sports Covered</div></div>
-      <div class="stat-item"><div class="stat-num">&lt;5s</div><div class="stat-lbl">Analysis Time</div></div>
-      <div class="stat-item"><div class="stat-num">EV</div><div class="stat-lbl">Rated Every Bet</div></div>
-      <div class="stat-item"><div class="stat-num">A–F</div><div class="stat-lbl">Grade Every Slip</div></div>
+    <div class="nav-right">
+      <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
+      <button class="btn btn-primary" onclick="openModal('signup')">Get started</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">AI-Powered Bet Analysis</div>
+    <h1>Stop Guessing.<br><span class="highlight">Start Winning.</span></h1>
+    <p>Upload your bet slip. BetIQ's AI reads every leg, pulls <strong style="color:var(--text)">real player stats</strong>, and tells you the <strong style="color:var(--text)">exact probability</strong> of hitting — before you lock it in.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" style="padding:14px 32px;font-size:16px" onclick="openModal('signup')">Start Analyzing Free →</button>
+      <button class="btn btn-outline" style="padding:14px 28px;font-size:16px">See Pricing</button>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat-item"><div class="stat-number">6+</div><div class="stat-label">SPORTS COVERED</div></div>
+    <div class="stat-item"><div class="stat-number">&lt;5s</div><div class="stat-label">ANALYSIS TIME</div></div>
+    <div class="stat-item"><div class="stat-number">EV</div><div class="stat-label">RATED EVERY BET</div></div>
+    <div class="stat-item"><div class="stat-number">A–F</div><div class="stat-label">GRADE EVERY SLIP</div></div>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker">
+      <span class="ticker-item">NBA Analysis</span><span class="ticker-item">NFL Props</span>
+      <span class="ticker-item">MLB Lines</span><span class="ticker-item">NHL Bets</span>
+      <span class="ticker-item">AI Powered</span><span class="ticker-item">EV Calculator</span>
+      <span class="ticker-item">Screenshot Upload</span><span class="ticker-item">Parlay Analysis</span>
+      <span class="ticker-item">Hit Probability</span><span class="ticker-item">UFC Fights</span>
+      <span class="ticker-item">NBA Analysis</span><span class="ticker-item">NFL Props</span>
+      <span class="ticker-item">MLB Lines</span><span class="ticker-item">NHL Bets</span>
+      <span class="ticker-item">AI Powered</span><span class="ticker-item">EV Calculator</span>
+      <span class="ticker-item">Screenshot Upload</span><span class="ticker-item">Parlay Analysis</span>
+      <span class="ticker-item">Hit Probability</span><span class="ticker-item">UFC Fights</span>
     </div>
   </div>
-  <div class="ticker-wrap"><div class="ticker"><span class="t-item">NBA Analysis</span><span class="t-item">NFL Props</span><span class="t-item">MLB Lines</span><span class="t-item">NHL Bets</span><span class="t-item">AI Powered</span><span class="t-item">EV Calculator</span><span class="t-item">Screenshot Upload</span><span class="t-item">Parlay Analysis</span><span class="t-item">Hit Probability</span><span class="t-item">UFC Fights</span><span class="t-item">NBA Analysis</span><span class="t-item">NFL Props</span><span class="t-item">MLB Lines</span><span class="t-item">NHL Bets</span><span class="t-item">AI Powered</span><span class="t-item">EV Calculator</span><span class="t-item">Screenshot Upload</span><span class="t-item">Parlay Analysis</span><span class="t-item">Hit Probability</span><span class="t-item">UFC Fights</span></div></div>
-  <div class="features">
-    <div class="sec-label">// Features</div>
-    <div class="sec-title">Everything You Need<br><span class="dim">To Bet Smarter.</span></div>
-    <div class="feat-grid">
-      <div class="feat-card"><div class="feat-icon">📸</div><div class="feat-name">SCREENSHOT UPLOAD</div><div class="feat-desc">Drop any bet slip image. AI reads every player, line, and odd automatically.</div></div>
-      <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-name">HIT PROBABILITY %</div><div class="feat-desc">Precise probability for every leg based on season stats, last 10 games, and matchup history.</div></div>
-      <div class="feat-card"><div class="feat-icon">💰</div><div class="feat-name">EV ANALYSIS</div><div class="feat-desc">See if the sportsbook is giving you value or taking it. Every bet rated +EV or -EV instantly.</div></div>
-      <div class="feat-card"><div class="feat-icon">🔗</div><div class="feat-name">PARLAY CALCULATOR</div><div class="feat-desc">Real combined probability across all legs. See your actual chance of winning.</div></div>
-      <div class="feat-card"><div class="feat-icon">📈</div><div class="feat-name">BET TRACKER</div><div class="feat-desc">Save every bet, mark wins and losses, and track your ROI over time.</div></div>
-      <div class="feat-card"><div class="feat-icon">🏆</div><div class="feat-name">6+ SPORTS</div><div class="feat-desc">NBA, NFL, MLB, NHL, Soccer, UFC, Tennis — year-round coverage.</div></div>
+
+  <section class="features" id="features">
+    <div class="section-label">// FEATURES</div>
+    <div class="section-title">Everything You Need<br><span class="dim">To Bet Smarter.</span></div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">📸</div><div class="feature-title">SCREENSHOT UPLOAD</div><div class="feature-desc">Drop any bet slip image. AI reads every player, line, and odd automatically — no typing required.</div></div>
+      <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">HIT PROBABILITY %</div><div class="feature-desc">Get a precise probability for every leg based on season stats, last 10 games, and matchup history.</div></div>
+      <div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">EV ANALYSIS</div><div class="feature-desc">See if the sportsbook is giving you value or taking it. Every bet rated +EV or -EV instantly.</div></div>
+      <div class="feature-card"><div class="feature-icon">🔗</div><div class="feature-title">PARLAY CALCULATOR</div><div class="feature-desc">Real combined probability across all legs — not marketing odds. See your actual chance of winning.</div></div>
+      <div class="feature-card"><div class="feature-icon">📈</div><div class="feature-title">BET TRACKER</div><div class="feature-desc">Save every bet, mark wins and losses, and track your ROI over time to see what works.</div></div>
+      <div class="feature-card"><div class="feature-icon">🏆</div><div class="feature-title">6+ SPORTS</div><div class="feature-desc">NBA, NFL, MLB, NHL, Soccer, UFC, Tennis — year-round coverage, never an offseason.</div></div>
     </div>
-  </div>
+  </section>
 </div>
 
-<div id="page-auth" class="page">
-  <div class="auth-wrap">
-    <div class="auth-card">
-      <div class="auth-logo">›Bet<span>IQ</span></div>
-      <div class="auth-tagline">Your AI betting analyst. Sign in to start.</div>
-      <div class="tab-row">
-        <button class="tab-btn active" id="tab-login" onclick="switchAuth('login')">Log in</button>
-        <button class="tab-btn" id="tab-signup" onclick="switchAuth('signup')">Sign up</button>
-      </div>
-      <div id="form-login">
+<!-- ─────────────────────────────────────────────── -->
+<!--  AUTH MODAL                                    -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="auth-modal" onclick="closeModalOnBackdrop(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-logo">›Bet<span>IQ</span></div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Log in</div>
+      <div class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Sign up</div>
+    </div>
+
+    <div id="auth-error" class="auth-error"></div>
+    <div id="auth-success" class="auth-success"></div>
+
+    <!-- LOGIN FORM -->
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
         <label class="form-label">Email</label>
-        <input type="email" class="form-input" id="li-email" placeholder="you@example.com">
-        <label class="form-label">Password</label>
-        <input type="password" class="form-input" id="li-pw" placeholder="••••••••">
-        <button class="submit-btn" id="li-btn" onclick="doLogin()">Log in</button>
-        <div class="form-msg" id="li-msg"></div>
+        <input id="login-email" type="email" class="form-input" placeholder="you@example.com" required>
       </div>
-      <div id="form-signup" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input id="login-password" type="password" class="form-input" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="login-btn">Log in</button>
+      <div class="auth-footer">Don't have an account? <a onclick="switchTab('signup')">Sign up free</a></div>
+    </form>
+
+    <!-- SIGNUP FORM -->
+    <form id="signup-form" style="display:none" onsubmit="handleSignup(event)">
+      <div class="form-group">
         <label class="form-label">Email</label>
-        <input type="email" class="form-input" id="su-email" placeholder="you@example.com">
+        <input id="signup-email" type="email" class="form-input" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
         <label class="form-label">Password</label>
-        <input type="password" class="form-input" id="su-pw" placeholder="Min 6 characters">
-        <button class="submit-btn" id="su-btn" onclick="doSignup()">Create account</button>
-        <div class="form-msg" id="su-msg"></div>
+        <input id="signup-password" type="password" class="form-input" placeholder="Min 6 characters" minlength="6" required>
       </div>
-    </div>
+      <button type="submit" class="btn btn-primary btn-full" id="signup-btn">Create account</button>
+      <div class="auth-footer">Already have an account? <a onclick="switchTab('login')">Log in</a></div>
+    </form>
   </div>
 </div>
 
-<div id="page-dashboard" class="page">
-  <div class="dash-wrap">
-    <div class="dash-top">
-      <div><div class="dash-title">Dashboard</div><div class="dash-email" id="dash-email"></div></div>
-      <span class="plan-tag plan-free" id="dash-plan">FREE</span>
-    </div>
-    <div class="limit-bar" id="limit-bar">
-      <div class="limit-txt">Daily limit reached for your plan.</div>
-      <div class="limit-link">Upgrade for more. <span onclick="showPage('pricing')">See plans →</span></div>
-    </div>
-    <div class="dash-tabs">
-      <button class="dtab active" onclick="switchDash('analyze')">Analyze</button>
-      <button class="dtab" onclick="switchDash('history')">History</button>
-      <button class="dtab" onclick="switchDash('tracker')">Tracker</button>
-    </div>
-    <div class="dsection active" id="ds-analyze">
-      <div class="mode-tabs">
-        <button class="mtab active" onclick="switchMode('upload')">📸 Upload Slip</button>
-        <button class="mtab" onclick="switchMode('text')">✏️ Type It</button>
-        <button class="mtab" onclick="switchMode('manual')">➕ Add Legs</button>
+<!-- ─────────────────────────────────────────────── -->
+<!--  DASHBOARD                                     -->
+<!-- ─────────────────────────────────────────────── -->
+<div id="dashboard">
+  <nav class="dash-nav">
+    <div class="logo">›Bet<span style="color:var(--green)">IQ</span></div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="credits-bar" id="credits-display"></div>
+      <div class="dash-user">
+        <span id="user-email-display"></span>
+        <span class="plan-badge" id="plan-badge">FREE</span>
       </div>
-      <div id="m-upload">
-        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-inp').click()">
-          <div class="dz-icon">📷</div>
-          <div class="dz-title">Drop your bet slip here</div>
-          <div class="dz-sub">PNG · JPG · PDF — click or drag & drop</div>
-          <input type="file" id="file-inp" accept="image/*,.pdf">
+      <button class="btn btn-ghost" onclick="handleLogout()">Log out</button>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <div class="dash-title">Analyze a Bet Slip</div>
+    <div class="dash-subtitle">Upload a screenshot, paste text, or enter legs manually.</div>
+
+    <div class="analyzer-card">
+      <div class="input-tabs">
+        <button class="input-tab active" onclick="switchInputTab('upload')">📸 Screenshot</button>
+        <button class="input-tab" onclick="switchInputTab('text')">📝 Paste Text</button>
+        <button class="input-tab" onclick="switchInputTab('manual')">✏️ Manual Entry</button>
+      </div>
+
+      <!-- UPLOAD PANEL -->
+      <div class="input-panel active" id="panel-upload">
+        <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+          <div class="upload-icon">📸</div>
+          <p><strong>Click to upload</strong> or drag & drop your bet slip</p>
+          <p style="margin-top:6px;font-size:12px">PNG, JPG, WEBP up to 10MB</p>
+          <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
         </div>
-        <div class="file-chip" id="file-chip"><span>📄</span><span id="file-name-lbl"></span></div>
+        <div class="uploaded-preview" id="file-preview"></div>
       </div>
-      <div id="m-text" style="display:none">
-        <textarea class="textarea" id="bet-text" style="min-height:130px" placeholder="e.g. Parlay: LeBron James over 27.5 pts + Luka Doncic over 8.5 assists + Lakers ML"></textarea>
+
+      <!-- TEXT PANEL -->
+      <div class="input-panel" id="panel-text">
+        <textarea class="form-textarea" id="bet-text" placeholder="Paste your bet slip text here...&#10;&#10;e.g. LeBron James Over 24.5 Points (-115)&#10;Stephen Curry Over 4.5 Threes (-110)"></textarea>
       </div>
-      <div id="m-manual" style="display:none">
-        <div id="legs-container"></div>
-        <button onclick="addLeg()" style="width:100%;background:none;border:1px dashed var(--border);color:var(--muted);padding:0.6rem;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:600;margin-bottom:0.5rem">+ Add leg</button>
+
+      <!-- MANUAL PANEL -->
+      <div class="input-panel" id="panel-manual">
+        <div id="manual-legs">
+          <div class="form-group"><input type="text" class="form-input manual-leg" placeholder="Leg 1: e.g. LeBron James Over 24.5 Points"></div>
+          <div class="form-group"><input type="text" class="form-input manual-leg" placeholder="Leg 2: e.g. Curry Over 4.5 Threes"></div>
+        </div>
+        <button type="button" onclick="addManualLeg()" style="background:none;border:1px dashed rgba(255,255,255,0.15);color:var(--muted);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:8px">+ Add leg</button>
       </div>
-      <div style="margin-top:0.9rem">
-        <select class="sel" id="sport-sel">
-          <option value="">Select sport (optional)</option>
-          <option>NBA</option><option>NFL</option><option>MLB</option><option>NHL</option><option>Soccer</option><option>UFC</option><option>Tennis</option>
-        </select>
-        <textarea class="textarea" id="ctx-input" placeholder="Any extra context? e.g. same-game parlay on FanDuel" rows="2"></textarea>
-      </div>
-      <button class="go-btn" id="go-btn" onclick="runAnalysis()">Analyze My Slip →</button>
-      <div class="load-wrap" id="load-wrap">
-        <div class="spinner"></div>
-        <div class="load-title">Running AI Analysis...</div>
-        <div class="steps-list">
-          <div class="step-item" id="s1">Parsing bet slip</div>
-          <div class="step-item" id="s2">Pulling player stats</div>
-          <div class="step-item" id="s3">Checking matchups</div>
-          <div class="step-item" id="s4">Calculating probabilities</div>
-          <div class="step-item" id="s5">Generating report</div>
+
+      <div class="form-row" style="margin-top:20px">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Sport</label>
+          <select class="form-select" id="sport-select">
+            <option value="">Auto-detect</option>
+            <option value="NBA">NBA Basketball</option>
+            <option value="NFL">NFL Football</option>
+            <option value="MLB">MLB Baseball</option>
+            <option value="NHL">NHL Hockey</option>
+            <option value="UFC">UFC / MMA</option>
+            <option value="Soccer">Soccer</option>
+            <option value="Tennis">Tennis</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Extra context (optional)</label>
+          <input type="text" class="form-input" id="context-input" placeholder="e.g. Game 7, back-to-back night">
         </div>
       </div>
-      <div class="res-wrap" id="res-wrap"></div>
+
+      <div id="analyze-error" style="background:rgba(255,92,92,0.1);border:1px solid rgba(255,92,92,0.3);color:var(--danger);font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:12px;display:none"></div>
+
+      <button class="analyze-btn" id="analyze-btn" onclick="runAnalysis()">Analyze Bet →</button>
     </div>
-    <div class="dsection" id="ds-history">
-      <div class="list-wrap" id="history-list"><div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">No analyses yet. Run your first one!</div></div></div>
+
+    <!-- RESULTS -->
+    <div id="results">
+      <div class="result-header" id="result-header"></div>
+      <div class="bets-grid" id="bets-grid"></div>
+      <div class="parlay-summary" id="parlay-summary"></div>
     </div>
-    <div class="dsection" id="ds-tracker">
-      <div class="list-wrap" id="tracker-list"><div class="empty"><div class="empty-icon">📈</div><div class="empty-txt">No bets tracked yet.</div></div></div>
+
+    <!-- HISTORY -->
+    <div class="history-section" id="history-section" style="display:none">
+      <div class="history-header">
+        <div class="history-title">Recent Analyses</div>
+      </div>
+      <div class="history-list" id="history-list"></div>
     </div>
   </div>
 </div>
 
-<div id="page-pricing" class="page">
-  <div class="pricing-wrap">
-    <div class="pricing-hdr">
-      <div class="sec-label" style="text-align:center">// Pricing</div>
-      <div class="sec-title" style="text-align:center">Simple, Honest Pricing</div>
-      <p>Start free. Upgrade when you're ready.</p>
-    </div>
-    <div class="plan-grid">
-      <div class="plan-card">
-        <div class="pn">Free</div><div class="pp">$0<span>/mo</span></div><div class="pp-period">Forever free</div>
-        <ul class="pf"><li>3 analyses per day</li><li>All 6+ sports</li><li>Bet tracker</li><li>Analysis history</li></ul>
-        <button class="plan-btn pb-curr" id="pb-free">Current plan</button>
-      </div>
-      <div class="plan-card featured">
-        <div class="pn">Pro</div><div class="pp">$9.99<span>/mo</span></div><div class="pp-period">Billed monthly</div>
-        <ul class="pf"><li>999 analyses per day</li><li>All 6+ sports</li><li>Priority AI model</li><li>Full history & tracker</li><li>EV analysis</li></ul>
-        <button class="plan-btn pb-green" id="pb-pro" onclick="subscribe('pro')">Upgrade to Pro</button>
-      </div>
-      <div class="plan-card">
-        <div class="pn">Sharp</div><div class="pp">$24.99<span>/mo</span></div><div class="pp-period">Billed monthly</div>
-        <ul class="pf"><li>Unlimited analyses</li><li>All 6+ sports</li><li>Priority AI model</li><li>Full history & tracker</li><li>EV analysis</li><li>Early feature access</li></ul>
-        <button class="plan-btn pb-outline" id="pb-sharp" onclick="subscribe('sharp')">Upgrade to Sharp</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
+<!-- ─────────────────────────────────────────────── -->
+<!--  JAVASCRIPT                                    -->
+<!-- ─────────────────────────────────────────────── -->
 <script>
-const SUPABASE_URL = 'https://qjteroaaqsznbwdpsjuh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqdGVyb2FhcXN6bmJ3ZHBzanVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDc2MjcsImV4cCI6MjA5MTY4MzYyN30.t6GYf4YaZvkoxk4_9n5tFOEA-0qNWyuAab1l0dosKMg';
-const API_BASE = 'https://betiq-backend-production-e425.up.railway.app';
+  // ── CONFIG ──
+  // Replace YOUR_SUPABASE_ANON_KEY with your actual anon key from:
+  // Supabase Dashboard → Project Settings → API → anon public key
+  const SUPABASE_URL = 'https://qjteroaaqsznbwdpsjuh.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqdGVyb2FhcXN6bmJ3ZHBzanVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDc2MjcsImV4cCI6MjA5MTY4MzYyN30.t6GYf4YaZvkoxk4_9n5tFOEA-0qNWyuAab1l0dosKMg';
+  const API_BASE = 'https://betiq-backend-production-e425.up.railway.app';
 
-let currentUser = null;
-let currentSession = null;
-let currentPlan = 'free';
-let currentResult = null;
-let inputMode = 'upload';
-let uploadedFile = null;
-let legCount = 0;
+  // ── INIT SUPABASE ──
+  const { createClient } = window.supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-async function sbSignUp(email, password) {
-  const r = await fetch(SUPABASE_URL + '/auth/v1/signup', {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
-  });
-  return r.json();
-}
+  // ── STATE ──
+  let currentSession = null;
+  let currentInputMode = 'upload';
+  let selectedFile = null;
 
-async function sbSignIn(email, password) {
-  const r = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
-  });
-  return r.json();
-}
-
-async function sbSignOut(token) {
-  await fetch(SUPABASE_URL + '/auth/v1/logout', {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + token }
-  });
-}
-
-function saveSession(s) { try { localStorage.setItem('biq_s', JSON.stringify(s)); } catch {} }
-function loadSession() { try { return JSON.parse(localStorage.getItem('biq_s')); } catch { return null; } }
-function clearSession() { try { localStorage.removeItem('biq_s'); } catch {} }
-
-async function initAuth() {
-  const saved = loadSession();
-  if (saved && saved.access_token) {
-    currentSession = saved;
-    currentUser = saved.user;
-    setLoggedIn();
-    await loadMe();
-  }
-}
-
-function setLoggedIn() {
-  document.getElementById('nav-guest').style.display = 'none';
-  document.getElementById('nav-user').style.display = 'flex';
-  if (currentUser) document.getElementById('dash-email').textContent = currentUser.email || '';
-}
-
-function setLoggedOut() {
-  document.getElementById('nav-guest').style.display = 'flex';
-  document.getElementById('nav-user').style.display = 'none';
-  currentUser = null; currentSession = null;
-  clearSession();
-}
-
-function showPage(name) {
-  if (name === 'dashboard' && !currentUser) { showPage('auth'); return; }
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  window.scrollTo(0, 0);
-  if (name === 'dashboard') loadMe();
-}
-
-function switchAuth(tab) {
-  document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none';
-  document.getElementById('form-signup').style.display = tab === 'signup' ? '' : 'none';
-  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
-}
-
-async function doLogin() {
-  const email = document.getElementById('li-email').value.trim();
-  const pw = document.getElementById('li-pw').value;
-  const btn = document.getElementById('li-btn');
-  const msg = document.getElementById('li-msg');
-  if (!email || !pw) { msg.textContent = 'Please fill in all fields.'; msg.className = 'form-msg err'; return; }
-  btn.disabled = true; btn.textContent = 'Logging in...';
-  msg.textContent = ''; msg.className = 'form-msg';
-  try {
-    const data = await sbSignIn(email, pw);
-    if (data.error || data.error_description) throw new Error(data.error_description || data.msg || 'Invalid email or password.');
-    currentSession = data; currentUser = data.user;
-    saveSession(data); setLoggedIn();
-    await loadMe();
-    showPage('dashboard');
-    loadHistory(); loadTracker();
-  } catch(e) {
-    msg.textContent = e.message || 'Login failed.';
-    msg.className = 'form-msg err';
-  }
-  btn.disabled = false; btn.textContent = 'Log in';
-}
-
-async function doSignup() {
-  const email = document.getElementById('su-email').value.trim();
-  const pw = document.getElementById('su-pw').value;
-  const btn = document.getElementById('su-btn');
-  const msg = document.getElementById('su-msg');
-  if (!email || !pw) { msg.textContent = 'Please fill in all fields.'; msg.className = 'form-msg err'; return; }
-  if (pw.length < 6) { msg.textContent = 'Password must be at least 6 characters.'; msg.className = 'form-msg err'; return; }
-  btn.disabled = true; btn.textContent = 'Creating account...';
-  msg.textContent = ''; msg.className = 'form-msg';
-  try {
-    const data = await sbSignUp(email, pw);
-    if (data.error || data.error_description) throw new Error(data.error_description || data.msg || 'Signup failed.');
-    if (data.access_token) {
-      currentSession = data; currentUser = data.user;
-      saveSession(data); setLoggedIn();
-      await loadMe(); showPage('dashboard');
+  // ── AUTH STATE LISTENER ──
+  sb.auth.onAuthStateChange((event, session) => {
+    currentSession = session;
+    if (session) {
+      showDashboard(session);
     } else {
-      msg.textContent = 'Account created! You can now log in.';
-      msg.className = 'form-msg ok';
-      switchAuth('login');
+      showLanding();
     }
-  } catch(e) {
-    msg.textContent = e.message || 'Signup failed.';
-    msg.className = 'form-msg err';
-  }
-  btn.disabled = false; btn.textContent = 'Create account';
-}
-
-async function doSignOut() {
-  if (currentSession && currentSession.access_token) await sbSignOut(currentSession.access_token);
-  setLoggedOut(); showPage('home');
-}
-
-async function loadMe() {
-  if (!currentSession || !currentSession.access_token) return;
-  try {
-    const r = await fetch(API_BASE + '/api/me', { headers: { 'Authorization': 'Bearer ' + currentSession.access_token } });
-    if (r.status === 401) { setLoggedOut(); return; }
-    const d = await r.json();
-    currentPlan = d.plan || 'free';
-    const rem = typeof d.analyses_remaining === 'number' ? d.analyses_remaining : 0;
-    document.getElementById('nav-credits').textContent = rem + ' left today';
-    const badge = document.getElementById('dash-plan');
-    badge.textContent = currentPlan.toUpperCase();
-    badge.className = 'plan-tag plan-' + currentPlan;
-    if (rem === 0) document.getElementById('limit-bar').classList.add('show');
-    else document.getElementById('limit-bar').classList.remove('show');
-    updatePricingBtns(currentPlan);
-  } catch(e) { console.error('loadMe:', e); }
-}
-
-function updatePricingBtns(plan) {
-  document.getElementById('pb-free').className = 'plan-btn ' + (plan === 'free' ? 'pb-curr' : 'pb-outline');
-  document.getElementById('pb-free').textContent = plan === 'free' ? 'Current plan' : 'Free';
-  document.getElementById('pb-pro').className = 'plan-btn ' + (plan === 'pro' ? 'pb-curr' : 'pb-green');
-  document.getElementById('pb-pro').textContent = plan === 'pro' ? 'Current plan' : 'Upgrade to Pro';
-  document.getElementById('pb-sharp').className = 'plan-btn ' + (plan === 'sharp' ? 'pb-curr' : 'pb-outline');
-  document.getElementById('pb-sharp').textContent = plan === 'sharp' ? 'Current plan' : 'Upgrade to Sharp';
-}
-
-function switchDash(tab) {
-  document.querySelectorAll('.dsection').forEach(s => s.classList.remove('active'));
-  document.getElementById('ds-' + tab).classList.add('active');
-  document.querySelectorAll('.dtab').forEach((t, i) => t.classList.toggle('active', ['analyze','history','tracker'][i] === tab));
-  if (tab === 'history') loadHistory();
-  if (tab === 'tracker') loadTracker();
-}
-
-function switchMode(mode) {
-  inputMode = mode;
-  ['upload','text','manual'].forEach(m => document.getElementById('m-' + m).style.display = m === mode ? '' : 'none');
-  document.querySelectorAll('.mtab').forEach((t, i) => t.classList.toggle('active', ['upload','text','manual'][i] === mode));
-}
-
-const dropZone = document.getElementById('drop-zone');
-const fileInp = document.getElementById('file-inp');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
-fileInp.addEventListener('change', () => { if (fileInp.files[0]) setFile(fileInp.files[0]); });
-function setFile(f) { uploadedFile = f; document.getElementById('file-name-lbl').textContent = f.name; document.getElementById('file-chip').classList.add('show'); }
-
-function addLeg() {
-  legCount++;
-  const div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:0.4rem;margin-bottom:0.4rem;align-items:center';
-  div.innerHTML = '<input type="text" class="textarea" style="min-height:auto;padding:0.6rem 0.8rem;flex:1" placeholder="e.g. LeBron James Over 27.5 Points (-115)"><button onclick="this.parentElement.remove()" style="background:none;border:1px solid var(--border);color:var(--dim);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:1rem;flex-shrink:0">x</button>';
-  document.getElementById('legs-container').appendChild(div);
-}
-
-async function runAnalysis() {
-  if (!currentUser || !currentSession) { showPage('auth'); return; }
-  const sport = document.getElementById('sport-sel').value;
-  const context = document.getElementById('ctx-input').value;
-  const formData = new FormData();
-  formData.append('sport', sport);
-  formData.append('context', context);
-  formData.append('inputMode', inputMode);
-  if (inputMode === 'upload') {
-    if (!uploadedFile) { showToast('Please upload a bet slip image.', 'r'); return; }
-    formData.append('image', uploadedFile);
-  } else if (inputMode === 'text') {
-    const txt = document.getElementById('bet-text').value.trim();
-    if (!txt) { showToast('Please describe your bet.', 'r'); return; }
-    formData.append('betText', txt);
-  } else {
-    const legs = [];
-    document.querySelectorAll('#legs-container input').forEach(i => { if (i.value.trim()) legs.push(i.value.trim()); });
-    if (!legs.length) { showToast('Please add at least one leg.', 'r'); return; }
-    formData.append('manualLegs', JSON.stringify(legs));
-  }
-  document.getElementById('go-btn').style.display = 'none';
-  document.getElementById('load-wrap').classList.add('show');
-  document.getElementById('res-wrap').classList.remove('show');
-  document.getElementById('res-wrap').innerHTML = '';
-  const stepIds = ['s1','s2','s3','s4','s5'];
-  let si = 0;
-  const st = setInterval(() => { if (si < stepIds.length) document.getElementById(stepIds[si++]).classList.add('done'); }, 800);
-  try {
-    const resp = await fetch(API_BASE + '/api/analyze', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + currentSession.access_token },
-      body: formData
-    });
-    clearInterval(st);
-    stepIds.forEach(id => document.getElementById(id).classList.remove('done'));
-    document.getElementById('load-wrap').classList.remove('show');
-    if (resp.status === 401) { setLoggedOut(); showPage('auth'); return; }
-    if (resp.status === 429) { document.getElementById('limit-bar').classList.add('show'); document.getElementById('go-btn').style.display = ''; showToast('Daily limit reached!', 'r'); return; }
-    const data = await resp.json();
-    if (!data.success) throw new Error(data.error || 'Analysis failed');
-    currentResult = data.data;
-    await loadMe();
-    renderResults(data.data);
-  } catch(e) {
-    clearInterval(st);
-    stepIds.forEach(id => document.getElementById(id).classList.remove('done'));
-    document.getElementById('load-wrap').classList.remove('show');
-    document.getElementById('go-btn').style.display = '';
-    showToast('Error: ' + e.message, 'r');
-  }
-}
-
-function renderResults(r) {
-  const res = document.getElementById('res-wrap');
-  res.classList.add('show');
-  const pct = (r.parlay && r.parlay.combined_probability) || r.overall_probability || 0;
-  const gc = (r.grade === 'A' || r.grade === 'B') ? 'var(--green)' : r.grade === 'C' ? '#f0b429' : 'var(--red)';
-  const evCls = (r.ev_summary || '').includes('+') ? 'pos' : 'neg';
-  const rCls = (r.risk_level || '').toLowerCase().includes('low') ? 'pos' : (r.risk_level || '').toLowerCase().includes('high') ? 'neg' : 'neu';
-  const betsHtml = (r.bets || []).map(b => {
-    const p = b.probability || 0;
-    const pc1 = p >= 65 ? 'pct-high' : p >= 45 ? 'pct-mid' : 'pct-low';
-    const pc2 = p >= 65 ? 'fill-h' : p >= 45 ? 'fill-m' : 'fill-l';
-    const statsH = (b.stats || []).map(s => '<div class="stat-box"><div class="sb-lbl">' + s.label + '</div><div class="sb-val">' + s.value + '</div></div>').join('');
-    const facH = (b.factors || []).map(f => '<div class="factor ' + f.type + '">' + (f.type==='pos'?'↑':f.type==='neg'?'↓':'→') + ' ' + f.text + '</div>').join('');
-    const evC = (b.ev || '').includes('+') ? 'pos' : 'neg';
-    return '<div class="bet-card"><div class="bc-top"><div><div class="bc-name">' + (b.player_name||'—') + '</div><div class="bc-team">' + (b.team||'') + '</div></div><div><div class="bc-pct ' + pc1 + '">' + p + '%</div><div class="bc-conf">' + (b.confidence||'') + '</div></div></div><div><span class="bc-line">' + (b.bet_line||'') + '</span></div><div class="prob-bar"><div class="prob-fill ' + pc2 + '" style="width:' + p + '%"></div></div><div class="bc-insight">' + (b.insight||'') + '</div>' + (statsH ? '<div class="bc-stats">' + statsH + '</div>' : '') + '<div class="factors">' + facH + '</div><div style="margin-top:0.6rem"><span class="pill ' + evC + '">' + (b.ev||'') + '</span></div></div>';
-  }).join('');
-  const parlayH = r.parlay ? '<div class="parlay-box"><div class="pb-top"><div class="pb-label">Parlay Summary</div><div class="pb-pct">' + r.parlay.combined_probability + '%</div></div><div class="pb-grid"><div class="pb-item"><label>Strongest Leg</label><span>' + (r.parlay.strongest_leg||'—') + '</span></div><div class="pb-item"><label>Weakest Leg</label><span>' + (r.parlay.weakest_leg||'—') + '</span></div></div>' + (r.parlay.risk_note ? '<div class="pb-note">' + r.parlay.risk_note + '</div>' : '') + '</div>' : '';
-  res.innerHTML = '<div class="grade-row"><div class="grade-circle" style="border-color:' + gc + '"><div class="grade-letter" style="color:' + gc + '">' + (r.grade||'?') + '</div><div class="grade-sub" style="color:' + gc + '">' + (r.grade_title||'') + '</div></div><div class="grade-info"><div class="grade-verdict">' + (r.overall_verdict||'') + '</div><div class="pills"><span class="pill ' + evCls + '">' + (r.ev_summary||'') + ' — ' + (r.ev_label||'') + '</span><span class="pill ' + rCls + '">Risk: ' + (r.risk_level||'') + '</span><span class="pill neu">' + (r.overall_probability||pct) + '% hit prob</span></div></div></div>' + parlayH + '<div class="bet-list">' + betsHtml + '</div><div class="action-btns"><button class="save-btn" onclick="saveBet()">Save to Tracker →</button><button class="reset-btn" onclick="resetAnalysis()">New Analysis</button></div>';
-}
-
-function resetAnalysis() {
-  document.getElementById('res-wrap').classList.remove('show');
-  document.getElementById('res-wrap').innerHTML = '';
-  document.getElementById('go-btn').style.display = '';
-  uploadedFile = null;
-  document.getElementById('file-chip').classList.remove('show');
-  document.getElementById('bet-text').value = '';
-  document.getElementById('ctx-input').value = '';
-  currentResult = null;
-}
-
-async function saveBet() {
-  if (!currentResult || !currentSession) return;
-  const r = currentResult;
-  const title = (r.bets || []).map(b => b.player_name).filter(Boolean).join(' + ') || 'Bet Slip';
-  try {
-    const resp = await fetch(API_BASE + '/api/tracker', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + currentSession.access_token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, sport: document.getElementById('sport-sel').value, grade: r.grade, probability: r.overall_probability, bet_line: (r.bets && r.bets[0] && r.bets[0].bet_line) || '' })
-    });
-    if (resp.ok) showToast('Saved to tracker!', 'g');
-    else showToast('Could not save bet.', 'r');
-  } catch { showToast('Could not save bet.', 'r'); }
-}
-
-async function loadHistory() {
-  if (!currentSession) return;
-  try {
-    const r = await fetch(API_BASE + '/api/history', { headers: { 'Authorization': 'Bearer ' + currentSession.access_token } });
-    const d = await r.json();
-    const list = document.getElementById('history-list');
-    if (!d.history || !d.history.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">No analyses yet. Run your first one!</div></div>'; return; }
-    list.innerHTML = d.history.map(h => {
-      const res = h.result || {};
-      const p = res.overall_probability || (res.parlay && res.parlay.combined_probability) || 0;
-      const pc = p >= 65 ? 'pct-high' : p >= 45 ? 'pct-mid' : 'pct-low';
-      return '<div class="h-card"><div><div class="h-sport">' + (h.sport||'SPORT') + '</div><div class="h-grade">' + (res.grade||'?') + ' — ' + (res.grade_title||'Analysis') + '</div><div class="h-date">' + new Date(h.created_at).toLocaleDateString() + '</div></div><div class="h-pct ' + pc + '">' + p + '%</div></div>';
-    }).join('');
-  } catch(e) { console.error(e); }
-}
-
-async function loadTracker() {
-  if (!currentSession) return;
-  try {
-    const r = await fetch(API_BASE + '/api/tracker', { headers: { 'Authorization': 'Bearer ' + currentSession.access_token } });
-    const d = await r.json();
-    const list = document.getElementById('tracker-list');
-    if (!d.bets || !d.bets.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">📈</div><div class="empty-txt">No bets tracked yet. Save one from your analysis!</div></div>'; return; }
-    list.innerHTML = d.bets.map(b => '<div class="t-card"><div class="tc-top"><div class="tc-title">' + (b.title||'Bet') + '</div><span class="outcome-tag ot-' + b.outcome + '">' + b.outcome.toUpperCase() + '</span></div><div class="tc-meta">' + (b.sport||'') + ' · Grade ' + (b.grade||'?') + ' · ' + (b.probability||0) + '% · ' + new Date(b.created_at).toLocaleDateString() + '</div>' + (b.outcome==='pending' ? '<div class="tc-actions"><button class="oc-btn oc-win" onclick="updateOutcome(\'' + b.id + '\',\'win\')">✓ Win</button><button class="oc-btn oc-loss" onclick="updateOutcome(\'' + b.id + '\',\'loss\')">✗ Loss</button></div>' : '') + '</div>').join('');
-  } catch(e) { console.error(e); }
-}
-
-async function updateOutcome(id, outcome) {
-  if (!currentSession) return;
-  await fetch(API_BASE + '/api/tracker/' + id, {
-    method: 'PATCH',
-    headers: { 'Authorization': 'Bearer ' + currentSession.access_token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ outcome })
   });
-  showToast('Marked as ' + outcome + '!', 'g');
-  loadTracker();
-}
 
-async function subscribe(plan) {
-  if (!currentUser || !currentSession) { showPage('auth'); return; }
-  try {
-    const r = await fetch(API_BASE + '/api/subscribe', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + currentSession.access_token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan })
+  // ── CHECK EXISTING SESSION ON LOAD ──
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentSession = session;
+      showDashboard(session);
+    }
+  })();
+
+  // ── SHOW / HIDE VIEWS ──
+  function showLanding() {
+    document.getElementById('landing').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'none';
+    closeModal();
+  }
+
+  async function showDashboard(session) {
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    closeModal();
+
+    const email = session.user?.email || '';
+    document.getElementById('user-email-display').textContent = email;
+
+    try {
+      const res = await apiGet('/api/me');
+      const plan = res.plan || 'free';
+      const used = res.analyses_used || 0;
+      const limit = res.analyses_limit || 3;
+      document.getElementById('plan-badge').textContent = plan.toUpperCase();
+      document.getElementById('credits-display').innerHTML =
+        `<span>${limit - used}</span> / ${limit} analyses today`;
+    } catch (e) {
+      document.getElementById('credits-display').textContent = '';
+    }
+
+    loadHistory();
+  }
+
+  // ── MODAL ──
+  function openModal(tab) {
+    document.getElementById('auth-modal').classList.add('active');
+    switchTab(tab || 'login');
+    clearAuthMessages();
+  }
+
+  function closeModal() {
+    document.getElementById('auth-modal').classList.remove('active');
+  }
+
+  function closeModalOnBackdrop(e) {
+    if (e.target === document.getElementById('auth-modal')) closeModal();
+  }
+
+  function switchTab(tab) {
+    document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+    clearAuthMessages();
+  }
+
+  function clearAuthMessages() {
+    const err = document.getElementById('auth-error');
+    const suc = document.getElementById('auth-success');
+    err.style.display = 'none';
+    suc.style.display = 'none';
+    err.textContent = '';
+    suc.textContent = '';
+  }
+
+  function showAuthError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function showAuthSuccess(msg) {
+    const el = document.getElementById('auth-success');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  // ── LOGIN ──
+  async function handleLogin(e) {
+    e.preventDefault();
+    clearAuthMessages();
+    const btn = document.getElementById('login-btn');
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    btn.disabled = true;
+    btn.textContent = 'Logging in...';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+    btn.disabled = false;
+    btn.textContent = 'Log in';
+
+    if (error) {
+      showAuthError(error.message);
+    }
+    // onAuthStateChange handles the rest
+  }
+
+  // ── SIGNUP ──
+  async function handleSignup(e) {
+    e.preventDefault();
+    clearAuthMessages();
+    const btn = document.getElementById('signup-btn');
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
+    const { data, error } = await sb.auth.signUp({ email, password });
+
+    btn.disabled = false;
+    btn.textContent = 'Create account';
+
+    if (error) {
+      showAuthError(error.message);
+      return;
+    }
+
+    // If email confirmation is required, data.session will be null
+    if (data.session) {
+      // Auto-confirmed — onAuthStateChange handles navigation
+    } else {
+      showAuthSuccess('Account created! Check your email to confirm, then log in.');
+      switchTab('login');
+    }
+  }
+
+  // ── LOGOUT ──
+  async function handleLogout() {
+    await sb.auth.signOut();
+    // onAuthStateChange handles navigation
+  }
+
+  // ── API HELPERS ──
+  async function apiGet(path) {
+    const token = currentSession?.access_token;
+    const res = await fetch(API_BASE + path, {
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {}
     });
-    const d = await r.json();
-    if (d.url) window.location.href = d.url;
-    else showToast('Could not start checkout.', 'r');
-  } catch { showToast('Error starting checkout.', 'r'); }
-}
+    if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+    return res.json();
+  }
 
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + (type || '');
-  setTimeout(() => { t.className = 'toast'; }, 3500);
-}
+  async function apiPost(path, body, isFormData) {
+    const token = currentSession?.access_token;
+    const headers = {};
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    if (!isFormData) headers['Content-Type'] = 'application/json';
 
-if (window.location.search.includes('upgraded=true')) {
-  showToast('Plan upgraded!', 'g');
-  history.replaceState({}, '', window.location.pathname);
-}
-initAuth();
+    const res = await fetch(API_BASE + path, {
+      method: 'POST',
+      headers,
+      body: isFormData ? body : JSON.stringify(body)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Request failed');
+    return json;
+  }
+
+  // ── INPUT TABS ──
+  function switchInputTab(mode) {
+    currentInputMode = mode;
+    document.querySelectorAll('.input-tab').forEach((t, i) => {
+      t.classList.toggle('active', ['upload', 'text', 'manual'][i] === mode);
+    });
+    document.querySelectorAll('.input-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + mode).classList.add('active');
+  }
+
+  // ── FILE UPLOAD ──
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) setSelectedFile(file);
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('drop-zone').classList.add('drag');
+  }
+
+  function handleDragLeave() {
+    document.getElementById('drop-zone').classList.remove('drag');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('drop-zone').classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) setSelectedFile(file);
+  }
+
+  function setSelectedFile(file) {
+    selectedFile = file;
+    document.getElementById('file-preview').textContent = '✓ ' + file.name;
+  }
+
+  // ── MANUAL LEGS ──
+  function addManualLeg() {
+    const container = document.getElementById('manual-legs');
+    const count = container.querySelectorAll('.manual-leg').length + 1;
+    const div = document.createElement('div');
+    div.className = 'form-group';
+    div.innerHTML = `<input type="text" class="form-input manual-leg" placeholder="Leg ${count}: e.g. Player Over X.X Stat">`;
+    container.appendChild(div);
+  }
+
+  // ── RUN ANALYSIS ──
+  async function runAnalysis() {
+    const btn = document.getElementById('analyze-btn');
+    const errEl = document.getElementById('analyze-error');
+    errEl.style.display = 'none';
+
+    const sport = document.getElementById('sport-select').value;
+    const context = document.getElementById('context-input').value;
+
+    // Build form data
+    const fd = new FormData();
+    fd.append('inputMode', currentInputMode);
+    fd.append('sport', sport);
+    fd.append('context', context);
+
+    if (currentInputMode === 'upload') {
+      if (!selectedFile) { showAnalyzeError('Please select a bet slip image.'); return; }
+      fd.append('image', selectedFile);
+    } else if (currentInputMode === 'text') {
+      const txt = document.getElementById('bet-text').value.trim();
+      if (!txt) { showAnalyzeError('Please paste your bet slip text.'); return; }
+      fd.append('betText', txt);
+    } else {
+      const legs = Array.from(document.querySelectorAll('.manual-leg'))
+        .map(i => i.value.trim()).filter(Boolean);
+      if (!legs.length) { showAnalyzeError('Please enter at least one bet leg.'); return; }
+      fd.append('manualLegs', JSON.stringify(legs));
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+    document.getElementById('results').style.display = 'none';
+
+    try {
+      const res = await apiPost('/api/analyze', fd, true);
+      renderResults(res.data);
+      loadHistory(); // refresh history after new analysis
+    } catch (err) {
+      showAnalyzeError(err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Analyze Bet →';
+    }
+  }
+
+  function showAnalyzeError(msg) {
+    const el = document.getElementById('analyze-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  // ── RENDER RESULTS ──
+  function renderResults(data) {
+    const gradeClass = 'grade-' + (data.grade || 'C');
+    const probColor = data.overall_probability >= 60 ? 'high' : data.overall_probability >= 40 ? 'mid' : 'low';
+
+    document.getElementById('result-header').innerHTML = `
+      <div class="grade-circle ${gradeClass}">${data.grade || '?'}</div>
+      <div class="result-summary">
+        <h2>${data.grade_title || 'Analysis Result'}</h2>
+        <p>${data.overall_verdict || ''}</p>
+        <div class="result-pills">
+          <span class="pill ${probColor === 'high' ? 'pill-green' : probColor === 'mid' ? 'pill-warn' : 'pill-red'}">${data.overall_probability}% Overall</span>
+          <span class="pill ${data.ev_summary === '+EV' ? 'pill-green' : 'pill-red'}">${data.ev_summary || ''}</span>
+          <span class="pill pill-blue">${data.risk_level || ''} Risk</span>
+          ${data.ev_label ? `<span class="pill pill-blue">${data.ev_label}</span>` : ''}
+        </div>
+      </div>`;
+
+    const betsHtml = (data.bets || []).map(bet => {
+      const pc = bet.probability >= 60 ? 'high' : bet.probability >= 40 ? 'mid' : 'low';
+      const statsHtml = (bet.stats || []).map(s => `
+        <div class="stat-chip">
+          <div class="stat-chip-label">${s.label}</div>
+          <div class="stat-chip-value">${s.value}</div>
+        </div>`).join('');
+      const factorsHtml = (bet.factors || []).map(f => `
+        <div class="factor">
+          <div class="factor-dot ${f.type}"></div>
+          <span style="color:var(--muted)">${f.text}</span>
+        </div>`).join('');
+      return `
+        <div class="bet-card">
+          <div class="bet-header">
+            <div>
+              <div class="bet-player">${bet.player_name || 'Unknown'}</div>
+              <div class="bet-team">${bet.team || ''}</div>
+              <div class="bet-line-tag" style="margin-top:6px">${bet.bet_line || ''}</div>
+            </div>
+            <div>
+              <div class="bet-prob ${pc}">${bet.probability}%<small>${bet.confidence || ''} · ${bet.ev || ''}</small></div>
+            </div>
+          </div>
+          <div class="bet-insight">${bet.insight || ''}</div>
+          <div class="stats-row">${statsHtml}</div>
+          <div class="factors">${factorsHtml}</div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('bets-grid').innerHTML = betsHtml;
+
+    const p = data.parlay || {};
+    document.getElementById('parlay-summary').innerHTML = `
+      <div class="parlay-title">PARLAY SUMMARY</div>
+      <div class="parlay-grid">
+        <div class="parlay-item"><label>Combined Probability</label><span>${p.combined_probability ?? '—'}%</span></div>
+        <div class="parlay-item"><label>Strongest Leg</label><span>${p.strongest_leg || '—'}</span></div>
+        <div class="parlay-item"><label>Weakest Leg</label><span>${p.weakest_leg || '—'}</span></div>
+        <div class="parlay-item"><label>Risk Note</label><span>${p.risk_note || '—'}</span></div>
+        ${p.correlation_warning ? `<div class="parlay-item" style="grid-column:1/-1"><label>⚠️ Correlation Warning</label><span>${p.correlation_warning}</span></div>` : ''}
+      </div>`;
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── LOAD HISTORY ──
+  async function loadHistory() {
+    try {
+      const res = await apiGet('/api/history');
+      const items = res.history || [];
+      if (!items.length) { document.getElementById('history-section').style.display = 'none'; return; }
+
+      document.getElementById('history-section').style.display = 'block';
+      document.getElementById('history-list').innerHTML = items.slice(0, 10).map(item => {
+        const grade = item.result?.grade || '?';
+        const sport = item.sport || 'Unknown';
+        const date = new Date(item.created_at).toLocaleDateString();
+        const gc = 'grade-' + grade;
+        return `<div class="history-item">
+          <div>
+            <div class="history-sport">${sport}</div>
+            <div class="history-date">${date}</div>
+          </div>
+          <div class="history-grade ${gc}">${grade}</div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      // history not critical
+    }
+  }
 </script>
 </body>
 </html>
