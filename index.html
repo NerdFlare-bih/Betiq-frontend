@@ -452,9 +452,26 @@
   // ── CHECK EXISTING SESSION ON LOAD ──
   (async () => {
     const { data: { session } } = await sb.auth.getSession();
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
+    const wantsSignup = params.get('signup');
+
     if (session) {
       currentSession = session;
-      showDashboard(session);
+      if (plan && plan !== 'free') {
+        showDashboard(session);
+        const res = await fetch(API_BASE + '/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+          body: JSON.stringify({ plan })
+        });
+        const data = await res.json();
+        if (data.url) window.location.href = data.url;
+      } else {
+        showDashboard(session);
+      }
+    } else if (wantsSignup) {
+      openModal('signup');
     }
   })();
 
