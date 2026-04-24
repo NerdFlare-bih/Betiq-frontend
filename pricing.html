@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing — BetIQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #08090d; --bg2: #0e1017; --bg3: #13151e;
+      --green: #1ff18f; --green-dim: rgba(31,241,143,0.10);
+      --text: #e3e9f6; --muted: #7183a0; --muted2: #45546b;
+      --danger: #ff5c5c;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px; border-bottom: 1px solid rgba(255,255,255,0.05);
+      position: sticky; top: 0; background: rgba(8,9,13,0.85); backdrop-filter: blur(20px); z-index: 100;
+    }
+    .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--green); }
+    .nav-links { display: flex; align-items: center; gap: 36px; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-right { display: flex; gap: 10px; }
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.18s; text-decoration: none; display: inline-block; }
+    .btn-ghost { background: transparent; color: var(--muted); }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-primary { background: var(--green); color: #08090d; box-shadow: 0 0 20px rgba(31,241,143,0.25); }
+    .btn-primary:hover { background: #2fffa0; box-shadow: 0 0 28px rgba(31,241,143,0.4); transform: translateY(-1px); }
+
+    /* PAGE HEADER */
+    .page-header { position: relative; overflow: hidden; text-align: center; padding: 80px 24px 60px; }
+    .page-header::before { content: ''; position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(31,241,143,0.08) 0%, transparent 70%); pointer-events: none; }
+    .section-tag { display: inline-flex; align-items: center; gap: 7px; background: var(--green-dim); color: var(--green); font-size: 12px; font-weight: 600; padding: 7px 16px; border-radius: 20px; margin-bottom: 24px; border: 1px solid rgba(31,241,143,0.18); }
+    .section-tag::before { content: ''; width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .page-header h1 { font-size: clamp(36px, 6vw, 56px); font-weight: 900; letter-spacing: -2px; margin-bottom: 16px; }
+    .page-header h1 span { background: linear-gradient(135deg, #1ff18f, #0dcf72); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .page-header p { font-size: 16px; color: var(--muted); max-width: 480px; margin: 0 auto 12px; line-height: 1.7; }
+
+    /* BILLING TOGGLE */
+    .billing-toggle { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 28px 0 48px; }
+    .toggle-label { font-size: 14px; font-weight: 500; color: var(--muted); }
+    .toggle-label.active { color: var(--text); }
+    .toggle { width: 44px; height: 24px; background: var(--bg3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; position: relative; transition: background 0.2s; }
+    .toggle.on { background: var(--green); }
+    .toggle-knob { width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 3px; transition: left 0.2s; }
+    .toggle.on .toggle-knob { left: 23px; }
+    .save-badge { background: rgba(31,241,143,0.12); color: var(--green); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(31,241,143,0.2); }
+
+    /* PRICING GRID */
+    .pricing-wrap { max-width: 1020px; margin: 0 auto; padding: 0 24px 80px; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+
+    .plan-card { background: var(--bg2); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 32px 28px; position: relative; transition: transform 0.2s, box-shadow 0.2s; }
+    .plan-card:hover { transform: translateY(-3px); }
+    .plan-card.popular { border-color: rgba(31,241,143,0.3); box-shadow: 0 0 40px rgba(31,241,143,0.08); }
+    .popular-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--green); color: #08090d; font-size: 11px; font-weight: 800; letter-spacing: 1px; padding: 4px 16px; border-radius: 20px; white-space: nowrap; }
+
+    .plan-name { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; margin-bottom: 12px; }
+    .plan-price { display: flex; align-items: flex-end; gap: 4px; margin-bottom: 6px; }
+    .plan-price-amount { font-size: 48px; font-weight: 900; letter-spacing: -2px; color: var(--text); line-height: 1; }
+    .plan-price-amount.green { background: linear-gradient(135deg, #1ff18f, #0dcf72); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .plan-price-period { font-size: 14px; color: var(--muted); padding-bottom: 6px; }
+    .plan-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; min-height: 40px; }
+
+    .plan-cta { width: 100%; padding: 13px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; transition: all 0.18s; margin-bottom: 28px; }
+    .plan-cta-free { background: var(--bg3); color: var(--text); border: 1px solid rgba(255,255,255,0.1); }
+    .plan-cta-free:hover { border-color: rgba(255,255,255,0.2); }
+    .plan-cta-pro { background: var(--green); color: #08090d; box-shadow: 0 0 20px rgba(31,241,143,0.3); }
+    .plan-cta-pro:hover { background: #2fffa0; box-shadow: 0 0 32px rgba(31,241,143,0.45); transform: translateY(-1px); }
+    .plan-cta-sharp { background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.15); }
+    .plan-cta-sharp:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+
+    .plan-divider { height: 1px; background: rgba(255,255,255,0.06); margin-bottom: 24px; }
+    .plan-features-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); margin-bottom: 14px; text-transform: uppercase; }
+    .plan-features { display: flex; flex-direction: column; gap: 11px; }
+    .feature-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+    .feature-check { color: var(--green); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .feature-x { color: var(--muted2); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .feature-text { color: var(--text); line-height: 1.4; }
+    .feature-text.dim { color: var(--muted2); }
+
+    /* FAQ */
+    .faq-section { max-width: 680px; margin: 0 auto; padding: 0 24px 80px; }
+    .faq-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 32px; text-align: center; }
+    .faq-list { display: flex; flex-direction: column; gap: 12px; }
+    .faq-item { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; overflow: hidden; }
+    .faq-question { padding: 18px 22px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: color 0.2s; }
+    .faq-question:hover { color: var(--green); }
+    .faq-arrow { color: var(--muted2); transition: transform 0.2s; font-size: 12px; }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); color: var(--green); }
+    .faq-answer { display: none; padding: 0 22px 18px; font-size: 13px; color: var(--muted); line-height: 1.75; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 14px; }
+    .faq-item.open .faq-answer { display: block; }
+
+    /* STATUS MESSAGE */
+    .status-msg { text-align: center; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; margin: 0 auto 24px; max-width: 400px; display: none; }
+    .status-msg.error { background: rgba(255,92,92,0.1); border: 1px solid rgba(255,92,92,0.3); color: var(--danger); }
+    .status-msg.success { background: rgba(31,241,143,0.1); border: 1px solid rgba(31,241,143,0.3); color: var(--green); }
+
+    @media (max-width: 768px) {
+      nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">›Bet<span>IQ</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="how-it-works.html">How It Works</a>
+    <a href="pricing.html" class="active">Pricing</a>
+  </div>
+  <div class="nav-right">
+    <a href="index.html" class="btn btn-ghost">Log in</a>
+    <a href="index.html" class="btn btn-primary">Get started</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="section-tag">Simple Pricing</div>
+  <h1>One Price. <span>Zero Guesswork.</span></h1>
+  <p>Start free, upgrade when you're ready. Cancel anytime — no contracts, no hidden fees.</p>
+</div>
+
+<div class="pricing-wrap">
+  <div class="billing-toggle">
+    <span class="toggle-label active" id="label-monthly">Monthly</span>
+    <div class="toggle" id="billing-toggle" onclick="toggleBilling()">
+      <div class="toggle-knob"></div>
+    </div>
+    <span class="toggle-label" id="label-annual">Annual</span>
+    <span class="save-badge">Save 20%</span>
+  </div>
+
+  <div id="status-msg" class="status-msg"></div>
+
+  <div class="pricing-grid">
+
+    <!-- FREE -->
+    <div class="plan-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">
+        <div class="plan-price-amount">$0</div>
+        <div class="plan-price-period">/ forever</div>
+      </div>
+      <div class="plan-desc">Get started with BetIQ. Perfect for casual bettors who want to test the waters.</div>
+      <button class="plan-cta plan-cta-free" onclick="choosePlan('free')">Get started free</button>
+      <div class="plan-divider"></div>
+      <div class="plan-features-label">What's included</div>
+      <div class="plan-features">
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">3 analyses per day</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Screenshot upload</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Hit probability %</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Letter grade (A–F)</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">EV rating</span></div>
+        <div class="feature-row"><span class="feature-x">✗</span><span class="feature-text dim">Bet tracker</span></div>
+        <div class="feature-row"><span class="feature-x">✗</span><span class="feature-text dim">Analysis history</span></div>
+        <div class="feature-row"><span class="feature-x">✗</span><span class="feature-text dim">Priority analysis</span></div>
+      </div>
+    </div>
+
+    <!-- PRO -->
+    <div class="plan-card popular">
+      <div class="popular-badge">MOST POPULAR</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">
+        <div class="plan-price-amount green" id="pro-price">$9.99</div>
+        <div class="plan-price-period" id="pro-period">/ month</div>
+      </div>
+      <div class="plan-desc">For serious bettors. Unlimited analyses and full access to every feature.</div>
+      <button class="plan-cta plan-cta-pro" onclick="choosePlan('pro')">Start Pro →</button>
+      <div class="plan-divider"></div>
+      <div class="plan-features-label">Everything in Free, plus</div>
+      <div class="plan-features">
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text"><strong>Unlimited</strong> analyses per day</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Full bet tracker</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Analysis history (last 50)</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">All 7 sports covered</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Parlay breakdown</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Win/loss tracking & ROI</span></div>
+        <div class="feature-row"><span class="feature-x">✗</span><span class="feature-text dim">Priority analysis queue</span></div>
+      </div>
+    </div>
+
+    <!-- SHARP -->
+    <div class="plan-card">
+      <div class="plan-name">Sharp</div>
+      <div class="plan-price">
+        <div class="plan-price-amount" id="sharp-price">$24.99</div>
+        <div class="plan-price-period" id="sharp-period">/ month</div>
+      </div>
+      <div class="plan-desc">Built for professional bettors and syndicates who need the maximum edge.</div>
+      <button class="plan-cta plan-cta-sharp" onclick="choosePlan('sharp')">Go Sharp →</button>
+      <div class="plan-divider"></div>
+      <div class="plan-features-label">Everything in Pro, plus</div>
+      <div class="plan-features">
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text"><strong>Unlimited</strong> analyses per day</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Priority analysis queue</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Unlimited analysis history</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Advanced parlay correlation</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Early access to new sports</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Priority support</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">API access (coming soon)</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <div class="faq-title">Frequently Asked Questions</div>
+  <div class="faq-list">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">Is BetIQ free to try? <span class="faq-arrow">▼</span></div>
+      <div class="faq-answer">Yes. The Free plan gives you 3 analyses per day with no credit card required. You can test every feature before upgrading.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">Can I cancel anytime? <span class="faq-arrow">▼</span></div>
+      <div class="faq-answer">Absolutely. There are no contracts or lock-ins. Cancel your subscription at any time and you'll retain access until the end of your billing period.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">How accurate are the probability ratings? <span class="faq-arrow">▼</span></div>
+      <div class="faq-answer">BetIQ's AI uses current season statistics, recent form, matchup history, and situational data to calculate probabilities. No model is perfect, but every analysis is based on real data — not gut feeling or marketing hype.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">What sportsbooks does BetIQ support? <span class="faq-arrow">▼</span></div>
+      <div class="faq-answer">BetIQ works with any sportsbook. Just screenshot your bet slip — it reads DraftKings, FanDuel, BetMGM, Caesars, PointsBet, and any other app automatically.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">Does upgrading happen instantly? <span class="faq-arrow">▼</span></div>
+      <div class="faq-answer">Yes. Once payment is confirmed your plan upgrades immediately and your daily limit resets to unlimited.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://qjteroaaqsznbwdpsjuh.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqdGVyb2FhcXN6bmJ3ZHBzanVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDc2MjcsImV4cCI6MjA5MTY4MzYyN30.t6GYf4YaZvkoxk4_9n5tFOEA-0qNWyuAab1l0dosKMg';
+  const API_BASE = 'https://betiq-backend-production-e425.up.railway.app';
+
+  const { createClient } = window.supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let isAnnual = false;
+  let currentSession = null;
+
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    currentSession = session;
+  })();
+
+  function toggleBilling() {
+    isAnnual = !isAnnual;
+    const toggle = document.getElementById('billing-toggle');
+    toggle.classList.toggle('on', isAnnual);
+    document.getElementById('label-monthly').classList.toggle('active', !isAnnual);
+    document.getElementById('label-annual').classList.toggle('active', isAnnual);
+    document.getElementById('pro-price').textContent = isAnnual ? '$7.99' : '$9.99';
+    document.getElementById('pro-period').textContent = isAnnual ? '/ month, billed annually' : '/ month';
+    document.getElementById('sharp-price').textContent = isAnnual ? '$19.99' : '$24.99';
+    document.getElementById('sharp-period').textContent = isAnnual ? '/ month, billed annually' : '/ month';
+  }
+
+  async function choosePlan(plan) {
+    if (plan === 'free') {
+      window.location.href = 'index.html';
+      return;
+    }
+    if (!currentSession) {
+      window.location.href = 'index.html';
+      return;
+    }
+    showStatus('Redirecting to checkout...', 'success');
+    try {
+      const res = await fetch(API_BASE + '/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + currentSession.access_token
+        },
+        body: JSON.stringify({ plan })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        showStatus(data.error || 'Something went wrong. Please try again.', 'error');
+      }
+    } catch (e) {
+      showStatus('Connection error. Please try again.', 'error');
+    }
+  }
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.className = 'status-msg ' + type;
+    el.style.display = 'block';
+  }
+
+  function toggleFaq(item) {
+    item.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
