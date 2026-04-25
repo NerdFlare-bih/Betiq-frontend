@@ -646,6 +646,7 @@
   let currentSession = null;
   let currentInputMode = 'upload';
   let selectedFile = null;
+  let dashboardLoaded = false; // prevent tab-reset on token refresh
 
   // ── AUTH STATE LISTENER ──
   sb.auth.onAuthStateChange(async (event, session) => {
@@ -704,6 +705,8 @@
   }
 
   async function showDashboard(session) {
+    const alreadyShowing = dashboardLoaded;
+
     document.getElementById('landing').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     closeModal();
@@ -725,8 +728,12 @@
       document.getElementById('qs-plan').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
     } catch (e) {}
 
-    switchDashTab('home');
-    loadHomeFeed();
+    // Only switch to home tab on the very first load — not on token refreshes
+    if (!alreadyShowing) {
+      dashboardLoaded = true;
+      switchDashTab('home');
+      loadHomeFeed();
+    }
   }
 
   // ── DASH TAB SWITCHING ──
@@ -939,6 +946,7 @@
 
   // ── LOGOUT ──
   async function handleLogout() {
+    dashboardLoaded = false;
     await sb.auth.signOut();
     // onAuthStateChange handles navigation
   }
