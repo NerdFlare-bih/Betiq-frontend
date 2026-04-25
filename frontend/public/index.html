@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BetIQ — AI Sports Bet Analyzer</title>
+  <meta name="description" content="Upload your bet slip and get AI-powered analysis with hit probability, EV rating, and A–F grade in seconds. NBA, NFL, MLB, NHL, UFC & more.">
+  <meta property="og:title" content="BetIQ — AI Sports Bet Analyzer">
+  <meta property="og:description" content="Stop guessing. Upload your bet slip and get real probability, EV rating, and an A–F grade powered by AI.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://betiq-frontend.vercel.app/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BetIQ — AI Sports Bet Analyzer">
+  <meta name="twitter:description" content="Stop guessing. Upload your bet slip and get real probability, EV rating, and an A–F grade powered by AI.">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -321,6 +329,75 @@
     .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #1ff18f, #0dcf72); border-radius: 10px; transition: width 0.4s ease; box-shadow: 0 0 8px rgba(31,241,143,0.5); }
     .progress-step { font-size: 12px; color: var(--muted); margin-top: 8px; }
 
+    /* ── LOADING SCREEN ── */
+    #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.35s ease; }
+    #loading-screen.fade-out { opacity: 0; pointer-events: none; }
+    .loading-logo { font-size: 26px; font-weight: 800; margin-bottom: 28px; letter-spacing: -0.5px; }
+    .loading-logo span { color: var(--green); }
+    .loading-dots { display: flex; gap: 8px; }
+    .loading-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: loadDot 1.2s ease-in-out infinite; opacity: 0.2; }
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes loadDot { 0%,100% { opacity: 0.2; transform: scale(0.75); } 40% { opacity: 1; transform: scale(1); } }
+    #landing { display: none; }
+
+    /* ── UPGRADE MODAL ── */
+    .upgrade-lock { font-size: 52px; text-align: center; margin-bottom: 12px; }
+    .upgrade-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; text-align: center; margin-bottom: 8px; }
+    .upgrade-sub { font-size: 14px; color: var(--muted); text-align: center; line-height: 1.65; margin-bottom: 28px; }
+    .upgrade-plans { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .upgrade-plan { border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg3); text-decoration: none; display: block; }
+    .upgrade-plan:hover { border-color: var(--green); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .upgrade-plan.featured { border-color: rgba(31,241,143,0.3); background: rgba(31,241,143,0.04); }
+    .upgrade-plan-name { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; margin-bottom: 8px; }
+    .upgrade-plan-price { font-size: 28px; font-weight: 900; letter-spacing: -1px; color: var(--green); line-height: 1; margin-bottom: 6px; }
+    .upgrade-plan-price small { font-size: 13px; font-weight: 400; color: var(--muted); }
+    .upgrade-plan-uses { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .upgrade-divider { text-align: center; font-size: 12px; color: var(--muted2); margin-bottom: 16px; }
+    .upgrade-footer-link { display: block; text-align: center; font-size: 13px; color: var(--green); text-decoration: none; font-weight: 600; padding: 10px; border-radius: 8px; transition: background 0.2s; }
+    .upgrade-footer-link:hover { background: var(--green-dim); }
+
+    /* ── FOOTER ── */
+    .site-footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 56px 48px 32px; background: var(--bg2); margin-top: 0; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; gap: 48px; margin-bottom: 44px; }
+    .footer-brand .logo { margin-bottom: 12px; }
+    .footer-brand p { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 240px; }
+    .footer-links { display: flex; gap: 56px; }
+    .footer-col-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; margin-bottom: 14px; }
+    .footer-col a { display: block; font-size: 13px; color: var(--muted); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--text); }
+    .footer-bottom { max-width: 1100px; margin: 0 auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted2); flex-wrap: wrap; gap: 12px; }
+    .footer-bottom-links { display: flex; gap: 20px; }
+    .footer-bottom-links a { color: var(--muted2); text-decoration: none; transition: color 0.2s; }
+    .footer-bottom-links a:hover { color: var(--muted); }
+
+    /* ── BET TRACKER ── */
+    .tracker-wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+    .tracker-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+    .tracker-stat { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px 22px; }
+    .tracker-stat-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; margin-bottom: 10px; }
+    .tracker-stat-value { font-size: 28px; font-weight: 900; letter-spacing: -1.5px; color: var(--text); line-height: 1; }
+    .tracker-stat-value.green { background: linear-gradient(135deg, #1ff18f, #0dcf72); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .tracker-list { display: flex; flex-direction: column; gap: 10px; }
+    .tracker-item { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; transition: border-color 0.2s; }
+    .tracker-item:hover { border-color: rgba(255,255,255,0.12); }
+    .tracker-grade-box { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; flex-shrink: 0; }
+    .tracker-info { flex: 1; min-width: 0; }
+    .tracker-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tracker-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .tracker-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .tracker-prob-tag { font-size: 12px; font-weight: 700; color: var(--muted); min-width: 36px; text-align: right; }
+    .outcome-btn { padding: 5px 13px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid transparent; transition: all 0.18s; }
+    .outcome-btn.win { background: rgba(31,241,143,0.08); color: var(--green); border-color: rgba(31,241,143,0.2); }
+    .outcome-btn.win.active, .outcome-btn.win:hover { background: var(--green); color: #08090d; border-color: var(--green); }
+    .outcome-btn.loss { background: rgba(255,92,92,0.08); color: var(--danger); border-color: rgba(255,92,92,0.2); }
+    .outcome-btn.loss.active, .outcome-btn.loss:hover { background: var(--danger); color: white; border-color: var(--danger); }
+    .tracker-pending-tag { font-size: 11px; color: var(--muted2); font-style: italic; }
+    .tracker-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .tracker-section-title { font-size: 17px; font-weight: 800; letter-spacing: -0.4px; }
+    .save-to-tracker-btn { width: 100%; margin-top: 16px; padding: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .save-to-tracker-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       nav { padding: 14px 20px; }
@@ -330,10 +407,26 @@
       .form-row { grid-template-columns: 1fr; }
       .result-header { flex-direction: column; }
       .stats { gap: 32px; }
+      .upgrade-plans { grid-template-columns: 1fr; }
+      .tracker-stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-inner { flex-direction: column; gap: 32px; }
+      .footer-links { gap: 32px; }
     }
   </style>
 </head>
 <body>
+
+<!-- ─────────────────────────────────────────────── -->
+<!--  LOADING SCREEN                                -->
+<!-- ─────────────────────────────────────────────── -->
+<div id="loading-screen">
+  <div class="loading-logo">›Bet<span>IQ</span></div>
+  <div class="loading-dots">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
+</div>
 
 <!-- ─────────────────────────────────────────────── -->
 <!--  LANDING PAGE                                  -->
@@ -399,6 +492,44 @@
       <div class="feature-card"><div class="feature-icon">🏆</div><div class="feature-title">6+ SPORTS</div><div class="feature-desc">NBA, NFL, MLB, NHL, Premier League, UFC, ATP/WTA — year-round coverage, never an offseason.</div></div>
     </div>
   </section>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">›Bet<span>IQ</span></div>
+        <p>AI-powered sports bet analysis. Know your odds before you place the bet.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <div class="footer-col-title">Product</div>
+          <a href="how-it-works.html">How It Works</a>
+          <a href="pricing.html">Pricing</a>
+          <a onclick="openModal('signup')" style="cursor:pointer">Get Started Free</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Sports</div>
+          <a href="#">NBA</a>
+          <a href="#">NFL</a>
+          <a href="#">MLB / NHL</a>
+          <a href="#">UFC / Soccer</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Legal</div>
+          <a href="#">Terms of Service</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Responsible Gambling</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 BetIQ. All rights reserved. For entertainment purposes only.</span>
+      <div class="footer-bottom-links">
+        <a href="pricing.html">Pricing</a>
+        <a href="how-it-works.html">How It Works</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+  </footer>
 </div>
 
 <!-- ─────────────────────────────────────────────── -->
@@ -448,6 +579,32 @@
 </div>
 
 <!-- ─────────────────────────────────────────────── -->
+<!--  UPGRADE MODAL                                 -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="upgrade-modal" onclick="closeUpgradeModal(event)">
+  <div class="modal" style="max-width:460px">
+    <button class="modal-close" onclick="closeUpgradeModal()">✕</button>
+    <div class="upgrade-lock">🔒</div>
+    <div class="upgrade-title">Daily Limit Reached</div>
+    <div class="upgrade-sub">You've used your 1 free analysis today.<br>Upgrade to keep analyzing — unlock more slips, more wins.</div>
+    <div class="upgrade-plans">
+      <a href="pricing.html" class="upgrade-plan">
+        <div class="upgrade-plan-name">Pro</div>
+        <div class="upgrade-plan-price">$9.99<small>/mo</small></div>
+        <div class="upgrade-plan-uses">10 analyses / day</div>
+      </a>
+      <a href="pricing.html" class="upgrade-plan featured">
+        <div class="upgrade-plan-name">⚡ Sharp</div>
+        <div class="upgrade-plan-price">$14.99<small>/mo</small></div>
+        <div class="upgrade-plan-uses">Unlimited analyses</div>
+      </a>
+    </div>
+    <div class="upgrade-divider">or</div>
+    <a href="pricing.html" class="upgrade-footer-link">View all plans & features →</a>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
 <!--  DASHBOARD                                     -->
 <!-- ─────────────────────────────────────────────── -->
 <div id="dashboard">
@@ -467,6 +624,7 @@
     <div class="dash-tab active" id="tab-home" onclick="switchDashTab('home')">🏠 Home</div>
     <div class="dash-tab" id="tab-analyze" onclick="switchDashTab('analyze')">🔍 Analyze</div>
     <div class="dash-tab" id="tab-history" onclick="switchDashTab('history')">📊 History</div>
+    <div class="dash-tab" id="tab-tracker" onclick="switchDashTab('tracker')">📌 Tracker</div>
   </div>
 
   <!-- ── HOME FEED ── -->
@@ -615,6 +773,9 @@
         <div class="result-header" id="result-header"></div>
         <div class="bets-grid" id="bets-grid"></div>
         <div class="parlay-summary" id="parlay-summary"></div>
+        <button class="save-to-tracker-btn" id="save-tracker-btn" onclick="saveCurrentToTracker()">
+          📌 Save to Bet Tracker
+        </button>
       </div>
     </div>
   </div>
@@ -624,6 +785,34 @@
     <div class="dash-title">Analysis History</div>
     <div class="dash-subtitle">All your previous bet analyses.</div>
     <div class="history-list" id="history-list"></div>
+  </div>
+
+  <!-- ── TRACKER VIEW ── -->
+  <div id="view-tracker" style="display:none">
+    <div class="tracker-wrap">
+      <div class="tracker-stats-grid">
+        <div class="tracker-stat">
+          <div class="tracker-stat-label">Total Bets</div>
+          <div class="tracker-stat-value" id="tr-total">—</div>
+        </div>
+        <div class="tracker-stat">
+          <div class="tracker-stat-label">Wins</div>
+          <div class="tracker-stat-value green" id="tr-wins">—</div>
+        </div>
+        <div class="tracker-stat">
+          <div class="tracker-stat-label">Losses</div>
+          <div class="tracker-stat-value" style="color:var(--danger)" id="tr-losses">—</div>
+        </div>
+        <div class="tracker-stat">
+          <div class="tracker-stat-label">Win Rate</div>
+          <div class="tracker-stat-value green" id="tr-rate">—</div>
+        </div>
+      </div>
+      <div class="tracker-section-header">
+        <div class="tracker-section-title">📌 Your Saved Bets</div>
+      </div>
+      <div class="tracker-list" id="tracker-list"></div>
+    </div>
   </div>
 </div>
 
@@ -671,6 +860,13 @@
     }
   });
 
+  // ── LOADING SCREEN HELPERS ──
+  function hideLoadingScreen() {
+    const el = document.getElementById('loading-screen');
+    el.classList.add('fade-out');
+    setTimeout(() => el.style.display = 'none', 360);
+  }
+
   // ── CHECK EXISTING SESSION ON LOAD ──
   (async () => {
     const { data: { session } } = await sb.auth.getSession();
@@ -692,8 +888,11 @@
       } else {
         showDashboard(session);
       }
-    } else if (wantsSignup) {
-      openModal('signup');
+    } else {
+      // No session — show landing
+      document.getElementById('landing').style.display = 'block';
+      hideLoadingScreen();
+      if (wantsSignup) openModal('signup');
     }
   })();
 
@@ -709,6 +908,7 @@
 
     document.getElementById('landing').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
+    hideLoadingScreen();
     closeModal();
 
     const email = session.user?.email || '';
@@ -738,11 +938,12 @@
 
   // ── DASH TAB SWITCHING ──
   function switchDashTab(tab) {
-    ['home','analyze','history'].forEach(t => {
+    ['home','analyze','history','tracker'].forEach(t => {
       document.getElementById('view-' + t).style.display = t === tab ? 'block' : 'none';
       document.getElementById('tab-' + t).classList.toggle('active', t === tab);
     });
     if (tab === 'history') loadHistoryView();
+    if (tab === 'tracker') loadTrackerView();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -961,14 +1162,14 @@
     return res.json();
   }
 
-  async function apiPost(path, body, isFormData) {
+  async function apiPost(path, body, isFormData, method = 'POST') {
     const token = currentSession?.access_token;
     const headers = {};
     if (token) headers['Authorization'] = 'Bearer ' + token;
     if (!isFormData) headers['Content-Type'] = 'application/json';
 
     const res = await fetch(API_BASE + path, {
-      method: 'POST',
+      method,
       headers,
       body: isFormData ? body : JSON.stringify(body)
     });
@@ -1116,11 +1317,17 @@
     try {
       const res = await apiPost('/api/analyze', fd, true);
       finishProgress(true);
+      lastAnalysisResult = res.data;
+      lastAnalysisSport = sport;
       renderResults(res.data);
       loadRecentFeed();
     } catch (err) {
       finishProgress(false);
-      showAnalyzeError(err.message);
+      if (err.message === 'Daily limit reached') {
+        openUpgradeModal();
+      } else {
+        showAnalyzeError(err.message);
+      }
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<span id="analyze-btn-text">Analyze Bet Slip →</span>';
@@ -1226,6 +1433,106 @@
 
   // keep old name working
   function loadHistory() { loadRecentFeed(); }
+
+  // ── UPGRADE MODAL ──
+  function openUpgradeModal() {
+    document.getElementById('upgrade-modal').classList.add('active');
+  }
+  function closeUpgradeModal(e) {
+    if (e && e.target !== document.getElementById('upgrade-modal')) return;
+    document.getElementById('upgrade-modal').classList.remove('active');
+  }
+
+  // ── TRACKER ──
+  let lastAnalysisResult = null;
+  let lastAnalysisSport = null;
+
+  async function loadTrackerView() {
+    try {
+      const res = await apiGet('/api/tracker');
+      const bets = res.bets || [];
+
+      // Stats
+      const wins = bets.filter(b => b.outcome === 'win').length;
+      const losses = bets.filter(b => b.outcome === 'loss').length;
+      const settled = wins + losses;
+      const rate = settled > 0 ? Math.round((wins / settled) * 100) + '%' : '—';
+      document.getElementById('tr-total').textContent = bets.length;
+      document.getElementById('tr-wins').textContent = wins;
+      document.getElementById('tr-losses').textContent = losses;
+      document.getElementById('tr-rate').textContent = rate;
+
+      if (!bets.length) {
+        document.getElementById('tracker-list').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📌</div>
+            No saved bets yet — analyze a slip and hit <strong>Save to Tracker</strong>
+          </div>`;
+        return;
+      }
+
+      document.getElementById('tracker-list').innerHTML = bets.map(bet => {
+        const gc = 'grade-' + (bet.grade || 'C');
+        const date = new Date(bet.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const isWin  = bet.outcome === 'win';
+        const isLoss = bet.outcome === 'loss';
+        return `
+          <div class="tracker-item" id="tbet-${bet.id}">
+            <div class="tracker-grade-box ${gc}">${bet.grade || '?'}</div>
+            <div class="tracker-info">
+              <div class="tracker-title">${bet.title || 'Bet Slip'}</div>
+              <div class="tracker-meta">${bet.sport || '—'} · ${date}${bet.probability ? ' · ' + bet.probability + '%' : ''}</div>
+            </div>
+            <div class="tracker-right">
+              ${bet.outcome === 'pending'
+                ? `<span class="tracker-pending-tag">Pending</span>`
+                : ''}
+              <button class="outcome-btn win ${isWin ? 'active' : ''}" onclick="markOutcome('${bet.id}','win')">✓ Win</button>
+              <button class="outcome-btn loss ${isLoss ? 'active' : ''}" onclick="markOutcome('${bet.id}','loss')">✗ Loss</button>
+            </div>
+          </div>`;
+      }).join('');
+    } catch (e) {
+      console.error('Tracker load error:', e);
+    }
+  }
+
+  async function markOutcome(id, outcome) {
+    try {
+      await apiPost('/api/tracker/' + id, { outcome }, false, 'PATCH');
+      loadTrackerView();
+    } catch (e) {}
+  }
+
+  async function saveCurrentToTracker() {
+    if (!lastAnalysisResult) return;
+    const btn = document.getElementById('save-tracker-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    try {
+      const d = lastAnalysisResult;
+      const title = d.grade_title || (d.bets?.[0]?.player_name ? d.bets[0].player_name + ' — ' + d.bets[0].bet_line : 'Bet Slip');
+      await apiPost('/api/tracker', {
+        title,
+        sport: lastAnalysisSport || 'Unknown',
+        grade: d.grade || 'C',
+        probability: d.overall_probability || 0,
+        bet_line: d.bets?.map(b => b.bet_line).join(' / ') || ''
+      }, false);
+      btn.textContent = '✓ Saved to Tracker!';
+      btn.style.color = 'var(--green)';
+      btn.style.borderColor = 'var(--green)';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = '📌 Save to Bet Tracker';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }, 2500);
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = '📌 Save to Bet Tracker';
+    }
+  }
 </script>
 </body>
 </html>
