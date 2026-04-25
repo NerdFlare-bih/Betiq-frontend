@@ -176,18 +176,19 @@
         <div class="plan-price-amount green" id="pro-price">$9.99</div>
         <div class="plan-price-period" id="pro-period">/ month</div>
       </div>
-      <div class="plan-desc">For serious bettors. Unlimited analyses and full access to every feature.</div>
+      <div class="plan-desc">For regular bettors who want data-driven decisions every day.</div>
       <button class="plan-cta plan-cta-pro" onclick="choosePlan('pro')">Start Pro →</button>
       <div class="plan-divider"></div>
       <div class="plan-features-label">Everything in Free, plus</div>
       <div class="plan-features">
-        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text"><strong>Unlimited</strong> analyses per day</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text"><strong>10 analyses</strong> per day</span></div>
         <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Full bet tracker</span></div>
-        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Analysis history (last 50)</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Analysis history (last 20)</span></div>
         <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">All 7 sports covered</span></div>
         <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Parlay breakdown</span></div>
-        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Win/loss tracking & ROI</span></div>
+        <div class="feature-row"><span class="feature-x">✗</span><span class="feature-text dim">Win/loss tracking & ROI</span></div>
         <div class="feature-row"><span class="feature-x">✗</span><span class="feature-text dim">Priority analysis queue</span></div>
+        <div class="feature-row"><span class="feature-x">✗</span><span class="feature-text dim">Unlimited history</span></div>
       </div>
     </div>
 
@@ -195,17 +196,18 @@
     <div class="plan-card">
       <div class="plan-name">Sharp</div>
       <div class="plan-price">
-        <div class="plan-price-amount" id="sharp-price">$24.99</div>
+        <div class="plan-price-amount" id="sharp-price">$14.99</div>
         <div class="plan-price-period" id="sharp-period">/ month</div>
       </div>
-      <div class="plan-desc">Built for professional bettors and syndicates who need the maximum edge.</div>
+      <div class="plan-desc">Built for serious bettors who want every possible edge, every single day.</div>
       <button class="plan-cta plan-cta-sharp" onclick="choosePlan('sharp')">Go Sharp →</button>
       <div class="plan-divider"></div>
       <div class="plan-features-label">Everything in Pro, plus</div>
       <div class="plan-features">
         <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text"><strong>Unlimited</strong> analyses per day</span></div>
-        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Priority analysis queue</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Win/loss tracking & ROI</span></div>
         <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Unlimited analysis history</span></div>
+        <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Priority analysis queue</span></div>
         <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Advanced parlay correlation</span></div>
         <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Early access to new sports</span></div>
         <div class="feature-row"><span class="feature-check">✓</span><span class="feature-text">Priority support</span></div>
@@ -267,7 +269,7 @@
     document.getElementById('label-annual').classList.toggle('active', isAnnual);
     document.getElementById('pro-price').textContent = isAnnual ? '$7.99' : '$9.99';
     document.getElementById('pro-period').textContent = isAnnual ? '/ month, billed annually' : '/ month';
-    document.getElementById('sharp-price').textContent = isAnnual ? '$19.99' : '$24.99';
+    document.getElementById('sharp-price').textContent = isAnnual ? '$11.99' : '$14.99';
     document.getElementById('sharp-period').textContent = isAnnual ? '/ month, billed annually' : '/ month';
   }
 
