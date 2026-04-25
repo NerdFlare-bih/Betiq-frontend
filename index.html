@@ -319,7 +319,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
-        <input id="signup-password" type="password" class="form-input" placeholder="Min 6 characters" minlength="6" required>
+        <input id="signup-password" type="password" class="form-input" placeholder="Min 8 chars, include a number" minlength="8" required>
       </div>
       <button type="submit" class="btn btn-primary btn-full" id="signup-btn">Create account</button>
       <div class="auth-footer">Already have an account? <a onclick="switchTab('login')">Log in</a></div>
@@ -593,6 +593,10 @@
     const btn = document.getElementById('signup-btn');
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value;
+
+    if (password.length < 8) { showAuthError('Password must be at least 8 characters.'); return; }
+    if (!/[A-Z]/.test(password)) { showAuthError('Password must include at least one uppercase letter.'); return; }
+    if (!/[0-9]/.test(password)) { showAuthError('Password must include at least one number.'); return; }
 
     btn.disabled = true;
     btn.textContent = 'Creating account...';
