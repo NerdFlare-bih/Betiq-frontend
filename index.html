@@ -201,6 +201,65 @@
     .history-date { font-size: 13px; color: var(--muted); }
     .history-grade { font-size: 22px; font-weight: 900; }
 
+    /* ── DASH TABS ── */
+    .dash-tabs { display: flex; gap: 4px; padding: 0 40px; border-bottom: 1px solid rgba(255,255,255,0.05); background: var(--bg); }
+    .dash-tab { padding: 14px 20px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; display: flex; align-items: center; gap: 7px; }
+    .dash-tab:hover { color: var(--text); }
+    .dash-tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+    /* ── HOME FEED ── */
+    .home-feed { max-width: 900px; margin: 0 auto; padding: 36px 24px; }
+    .home-greeting { margin-bottom: 32px; }
+    .home-greeting h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+    .home-greeting p { font-size: 14px; color: var(--muted); }
+
+    .quick-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 40px; }
+    .quick-stat { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 18px 20px; }
+    .quick-stat-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; margin-bottom: 8px; }
+    .quick-stat-value { font-size: 26px; font-weight: 900; letter-spacing: -1px; color: var(--text); }
+    .quick-stat-value.green { color: var(--green); }
+    .quick-stat-sub { font-size: 12px; color: var(--muted2); margin-top: 3px; }
+
+    .feed-section { margin-bottom: 40px; }
+    .feed-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .feed-section-title { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+    .feed-section-sub { font-size: 12px; color: var(--muted2); }
+    .feed-section-action { font-size: 13px; color: var(--green); cursor: pointer; font-weight: 600; }
+    .feed-section-action:hover { text-decoration: underline; }
+
+    .trending-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .trending-card { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+    .trending-card:hover { border-color: rgba(31,241,143,0.2); transform: translateY(-1px); }
+    .trending-left { flex: 1; }
+    .trending-sport { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; margin-bottom: 5px; }
+    .trending-player { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .trending-line { font-size: 13px; color: var(--muted); }
+    .trending-right { text-align: right; flex-shrink: 0; margin-left: 16px; }
+    .trending-prob { font-size: 22px; font-weight: 900; }
+    .trending-prob.high { color: var(--green); }
+    .trending-prob.mid { color: var(--warn); }
+    .trending-ev { font-size: 11px; font-weight: 700; margin-top: 2px; }
+    .trending-ev.pos { color: var(--green); }
+    .trending-ev.neg { color: var(--danger); }
+
+    .sport-spotlight { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .sport-card-feed { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 18px; text-align: center; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+    .sport-card-feed:hover { border-color: rgba(31,241,143,0.2); transform: translateY(-2px); }
+    .sport-card-emoji { font-size: 28px; margin-bottom: 8px; }
+    .sport-card-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .sport-card-status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; display: inline-block; }
+    .sport-card-status.live { background: rgba(31,241,143,0.12); color: var(--green); }
+    .sport-card-status.off { background: rgba(113,131,160,0.12); color: var(--muted2); }
+
+    .recent-feed { display: flex; flex-direction: column; gap: 10px; }
+    .recent-feed-item { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color 0.2s; }
+    .recent-feed-item:hover { border-color: rgba(255,255,255,0.15); }
+    .recent-feed-sport { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); margin-bottom: 4px; text-transform: uppercase; }
+    .recent-feed-date { font-size: 13px; color: var(--muted); }
+    .recent-feed-grade { font-size: 24px; font-weight: 900; }
+    .empty-state { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+    .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       nav { padding: 14px 20px; }
@@ -332,7 +391,7 @@
 <!-- ─────────────────────────────────────────────── -->
 <div id="dashboard">
   <nav class="dash-nav">
-    <div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="cursor:pointer">›Bet<span style="color:var(--green)">IQ</span></div>
+    <div class="logo" onclick="switchDashTab('home')" style="cursor:pointer">›Bet<span style="color:var(--green)">IQ</span></div>
     <div style="display:flex;align-items:center;gap:16px">
       <div class="credits-bar" id="credits-display"></div>
       <div class="dash-user">
@@ -343,7 +402,74 @@
     </div>
   </nav>
 
-  <div class="dash-body">
+  <div class="dash-tabs">
+    <div class="dash-tab active" id="tab-home" onclick="switchDashTab('home')">🏠 Home</div>
+    <div class="dash-tab" id="tab-analyze" onclick="switchDashTab('analyze')">🔍 Analyze</div>
+    <div class="dash-tab" id="tab-history" onclick="switchDashTab('history')">📊 History</div>
+  </div>
+
+  <!-- ── HOME FEED ── -->
+  <div id="view-home" class="home-feed">
+    <div class="home-greeting">
+      <h2 id="home-greeting-text">Welcome back 👋</h2>
+      <p>Here's what's happening in sports betting today.</p>
+    </div>
+
+    <div class="quick-stats">
+      <div class="quick-stat">
+        <div class="quick-stat-label">Analyses Left</div>
+        <div class="quick-stat-value green" id="qs-remaining">—</div>
+        <div class="quick-stat-sub">today</div>
+      </div>
+      <div class="quick-stat">
+        <div class="quick-stat-label">Your Plan</div>
+        <div class="quick-stat-value" id="qs-plan">—</div>
+        <div class="quick-stat-sub"><a href="pricing.html" style="color:var(--green);text-decoration:none;font-size:11px">Upgrade →</a></div>
+      </div>
+      <div class="quick-stat">
+        <div class="quick-stat-label">Total Analyses</div>
+        <div class="quick-stat-value" id="qs-total">—</div>
+        <div class="quick-stat-sub">all time</div>
+      </div>
+      <div class="quick-stat">
+        <div class="quick-stat-label">Last Grade</div>
+        <div class="quick-stat-value" id="qs-last-grade">—</div>
+        <div class="quick-stat-sub" id="qs-last-sport">no analyses yet</div>
+      </div>
+    </div>
+
+    <!-- TRENDING BETS -->
+    <div class="feed-section">
+      <div class="feed-section-header">
+        <div>
+          <div class="feed-section-title">🔥 Trending Bets Today</div>
+          <div class="feed-section-sub">Popular props — click any to analyze</div>
+        </div>
+        <div class="feed-section-action" onclick="switchDashTab('analyze')">Analyze your own →</div>
+      </div>
+      <div class="trending-grid" id="trending-grid"></div>
+    </div>
+
+    <!-- SPORTS IN SEASON -->
+    <div class="feed-section">
+      <div class="feed-section-header">
+        <div class="feed-section-title">🏟️ Sports in Season</div>
+      </div>
+      <div class="sport-spotlight" id="sport-spotlight"></div>
+    </div>
+
+    <!-- RECENT ANALYSES -->
+    <div class="feed-section">
+      <div class="feed-section-header">
+        <div class="feed-section-title">📈 Your Recent Analyses</div>
+        <div class="feed-section-action" onclick="switchDashTab('history')">View all →</div>
+      </div>
+      <div class="recent-feed" id="recent-feed"></div>
+    </div>
+  </div>
+
+  <!-- ── ANALYZE VIEW ── -->
+  <div id="view-analyze" class="dash-body" style="display:none">
     <div class="dash-title">Analyze a Bet Slip</div>
     <div class="dash-subtitle">Upload a screenshot, paste text, or enter legs manually.</div>
 
@@ -353,8 +479,6 @@
         <button class="input-tab" onclick="switchInputTab('text')">📝 Paste Text</button>
         <button class="input-tab" onclick="switchInputTab('manual')">✏️ Manual Entry</button>
       </div>
-
-      <!-- UPLOAD PANEL -->
       <div class="input-panel active" id="panel-upload">
         <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
           <div class="upload-icon">📸</div>
@@ -364,13 +488,9 @@
         </div>
         <div class="uploaded-preview" id="file-preview"></div>
       </div>
-
-      <!-- TEXT PANEL -->
       <div class="input-panel" id="panel-text">
         <textarea class="form-textarea" id="bet-text" placeholder="Paste your bet slip text here...&#10;&#10;e.g. LeBron James Over 24.5 Points (-115)&#10;Stephen Curry Over 4.5 Threes (-110)"></textarea>
       </div>
-
-      <!-- MANUAL PANEL -->
       <div class="input-panel" id="panel-manual">
         <div id="manual-legs">
           <div class="form-group"><input type="text" class="form-input manual-leg" placeholder="Leg 1: e.g. LeBron James Over 24.5 Points"></div>
@@ -378,7 +498,6 @@
         </div>
         <button type="button" onclick="addManualLeg()" style="background:none;border:1px dashed rgba(255,255,255,0.15);color:var(--muted);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:8px">+ Add leg</button>
       </div>
-
       <div class="form-row" style="margin-top:20px">
         <div class="form-group" style="margin:0">
           <label class="form-label">Sport</label>
@@ -398,26 +517,22 @@
           <input type="text" class="form-input" id="context-input" placeholder="e.g. Game 7, back-to-back night">
         </div>
       </div>
-
       <div id="analyze-error" style="background:rgba(255,92,92,0.1);border:1px solid rgba(255,92,92,0.3);color:var(--danger);font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:12px;display:none"></div>
-
       <button class="analyze-btn" id="analyze-btn" onclick="runAnalysis()">Analyze Bet →</button>
     </div>
 
-    <!-- RESULTS -->
     <div id="results">
       <div class="result-header" id="result-header"></div>
       <div class="bets-grid" id="bets-grid"></div>
       <div class="parlay-summary" id="parlay-summary"></div>
     </div>
+  </div>
 
-    <!-- HISTORY -->
-    <div class="history-section" id="history-section" style="display:none">
-      <div class="history-header">
-        <div class="history-title">Recent Analyses</div>
-      </div>
-      <div class="history-list" id="history-list"></div>
-    </div>
+  <!-- ── HISTORY VIEW ── -->
+  <div id="view-history" class="dash-body" style="display:none">
+    <div class="dash-title">Analysis History</div>
+    <div class="dash-subtitle">All your previous bet analyses.</div>
+    <div class="history-list" id="history-list"></div>
   </div>
 </div>
 
@@ -504,20 +619,130 @@
 
     const email = session.user?.email || '';
     document.getElementById('user-email-display').textContent = email;
+    const firstName = email.split('@')[0];
+    document.getElementById('home-greeting-text').textContent = `Welcome back, ${firstName} 👋`;
 
     try {
       const res = await apiGet('/api/me');
       const plan = res.plan || 'free';
       const used = res.analyses_used || 0;
-      const limit = res.analyses_limit || 3;
+      const limit = res.analyses_limit || 1;
+      const remaining = Math.max(0, limit - used);
       document.getElementById('plan-badge').textContent = plan.toUpperCase();
-      document.getElementById('credits-display').innerHTML =
-        `<span>${limit - used}</span> / ${limit} analyses today`;
-    } catch (e) {
-      document.getElementById('credits-display').textContent = '';
-    }
+      document.getElementById('credits-display').innerHTML = `<span>${remaining}</span> / ${limit} analyses today`;
+      document.getElementById('qs-remaining').textContent = remaining;
+      document.getElementById('qs-plan').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+    } catch (e) {}
 
-    loadHistory();
+    switchDashTab('home');
+    loadHomeFeed();
+  }
+
+  // ── DASH TAB SWITCHING ──
+  function switchDashTab(tab) {
+    ['home','analyze','history'].forEach(t => {
+      document.getElementById('view-' + t).style.display = t === tab ? 'block' : 'none';
+      document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    });
+    if (tab === 'history') loadHistoryView();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── HOME FEED ──
+  async function loadHomeFeed() {
+    renderTrending();
+    renderSports();
+    await loadRecentFeed();
+  }
+
+  function renderTrending() {
+    const bets = [
+      { sport: 'NBA', player: 'Nikola Jokić', line: 'Over 26.5 Points', prob: 71, ev: '+EV' },
+      { sport: 'NBA', player: 'Shai Gilgeous-Alexander', line: 'Over 30.5 Points', prob: 65, ev: '+EV' },
+      { sport: 'MLB', player: 'Shohei Ohtani', line: 'Over 1.5 Hits', prob: 68, ev: '+EV' },
+      { sport: 'MLB', player: 'Aaron Judge', line: 'Over 0.5 Home Runs', prob: 38, ev: '-EV' },
+      { sport: 'UFC', player: 'Islam Makhachev', line: 'To Win by Decision', prob: 55, ev: '+EV' },
+      { sport: 'Premier League', player: 'Erling Haaland', line: 'Anytime Goalscorer', prob: 48, ev: '-EV' },
+    ];
+    document.getElementById('trending-grid').innerHTML = bets.map(b => {
+      const pc = b.prob >= 60 ? 'high' : b.prob >= 45 ? 'mid' : 'mid';
+      const evc = b.ev === '+EV' ? 'pos' : 'neg';
+      return `<div class="trending-card" onclick="prefillAndAnalyze('${b.sport}','${b.player} ${b.line}')">
+        <div class="trending-left">
+          <div class="trending-sport">${b.sport}</div>
+          <div class="trending-player">${b.player}</div>
+          <div class="trending-line">${b.line}</div>
+        </div>
+        <div class="trending-right">
+          <div class="trending-prob ${pc}">${b.prob}%</div>
+          <div class="trending-ev ${evc}">${b.ev}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderSports() {
+    const sports = [
+      { emoji: '🏀', name: 'NBA', status: 'live', label: 'In Season' },
+      { emoji: '⚾', name: 'MLB', status: 'live', label: 'In Season' },
+      { emoji: '⚽', name: 'Premier League', status: 'live', label: 'In Season' },
+      { emoji: '🥊', name: 'UFC', status: 'live', label: 'Year Round' },
+      { emoji: '🎾', name: 'ATP / WTA', status: 'live', label: 'In Season' },
+      { emoji: '🏈', name: 'NFL', status: 'off', label: 'Off Season' },
+      { emoji: '🏒', name: 'NHL', status: 'live', label: 'Playoffs' },
+      { emoji: '🏀', name: 'WNBA', status: 'live', label: 'In Season' },
+    ];
+    document.getElementById('sport-spotlight').innerHTML = sports.map(s => `
+      <div class="sport-card-feed" onclick="preselectSport('${s.name}')">
+        <div class="sport-card-emoji">${s.emoji}</div>
+        <div class="sport-card-name">${s.name}</div>
+        <div class="sport-card-status ${s.status}">${s.label}</div>
+      </div>`).join('');
+  }
+
+  async function loadRecentFeed() {
+    try {
+      const res = await apiGet('/api/history');
+      const items = res.history || [];
+      document.getElementById('qs-total').textContent = items.length;
+      if (items.length > 0) {
+        const last = items[0];
+        document.getElementById('qs-last-grade').textContent = last.result?.grade || '?';
+        document.getElementById('qs-last-sport').textContent = last.sport || '';
+      }
+      if (!items.length) {
+        document.getElementById('recent-feed').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div>No analyses yet — <span style="color:var(--green);cursor:pointer" onclick="switchDashTab('analyze')">analyze your first bet</span></div>`;
+        return;
+      }
+      document.getElementById('recent-feed').innerHTML = items.slice(0, 5).map(item => {
+        const grade = item.result?.grade || '?';
+        const gc = 'grade-' + grade;
+        const sport = item.sport || 'Unknown';
+        const date = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const prob = item.result?.overall_probability;
+        return `<div class="recent-feed-item" onclick="switchDashTab('history')">
+          <div>
+            <div class="recent-feed-sport">${sport}</div>
+            <div class="recent-feed-date">${date}${prob ? ' · ' + prob + '% probability' : ''}</div>
+          </div>
+          <div class="recent-feed-grade ${gc}">${grade}</div>
+        </div>`;
+      }).join('');
+    } catch (e) {}
+  }
+
+  function prefillAndAnalyze(sport, text) {
+    switchDashTab('analyze');
+    switchInputTab('text');
+    document.getElementById('bet-text').value = text;
+    const sel = document.getElementById('sport-select');
+    for (let o of sel.options) { if (o.value === sport) { sel.value = sport; break; } }
+  }
+
+  function preselectSport(sport) {
+    switchDashTab('analyze');
+    const sel = document.getElementById('sport-select');
+    for (let o of sel.options) { if (o.value === sport || o.text.includes(sport)) { sel.value = o.value; break; } }
   }
 
   // ── MODAL ──
@@ -735,7 +960,7 @@
     try {
       const res = await apiPost('/api/analyze', fd, true);
       renderResults(res.data);
-      loadHistory(); // refresh history after new analysis
+      loadRecentFeed();
     } catch (err) {
       showAnalyzeError(err.message);
     } finally {
@@ -815,31 +1040,34 @@
     document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ── LOAD HISTORY ──
-  async function loadHistory() {
+  // ── LOAD HISTORY VIEW ──
+  async function loadHistoryView() {
     try {
       const res = await apiGet('/api/history');
       const items = res.history || [];
-      if (!items.length) { document.getElementById('history-section').style.display = 'none'; return; }
-
-      document.getElementById('history-section').style.display = 'block';
-      document.getElementById('history-list').innerHTML = items.slice(0, 10).map(item => {
+      if (!items.length) {
+        document.getElementById('history-list').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div>No analyses yet — <span style="color:var(--green);cursor:pointer" onclick="switchDashTab('analyze')">analyze your first bet</span></div>`;
+        return;
+      }
+      document.getElementById('history-list').innerHTML = items.map(item => {
         const grade = item.result?.grade || '?';
         const sport = item.sport || 'Unknown';
-        const date = new Date(item.created_at).toLocaleDateString();
+        const date = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const prob = item.result?.overall_probability;
         const gc = 'grade-' + grade;
         return `<div class="history-item">
           <div>
-            <div class="history-sport">${sport}</div>
-            <div class="history-date">${date}</div>
+            <div class="history-sport">${sport.toUpperCase()}</div>
+            <div class="history-date">${date}${prob ? ' · ' + prob + '% probability' : ''}</div>
           </div>
           <div class="history-grade ${gc}">${grade}</div>
         </div>`;
       }).join('');
-    } catch (e) {
-      // history not critical
-    }
+    } catch (e) {}
   }
+
+  // keep old name working
+  function loadHistory() { loadRecentFeed(); }
 </script>
 </body>
 </html>
