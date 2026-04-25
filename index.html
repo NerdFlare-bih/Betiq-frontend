@@ -272,6 +272,36 @@
     .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; background: var(--bg2); border: 1px dashed rgba(255,255,255,0.08); border-radius: 16px; }
     .empty-state .empty-icon { font-size: 40px; margin-bottom: 14px; display: block; }
 
+    /* ── ANALYZE PAGE ── */
+    .analyze-hero { background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 56px 24px 48px; text-align: center; position: relative; overflow: hidden; }
+    .analyze-hero::before { content: ''; position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 400px; background: radial-gradient(ellipse, rgba(31,241,143,0.07) 0%, transparent 70%); pointer-events: none; }
+    .analyze-hero-inner { max-width: 600px; margin: 0 auto; position: relative; }
+    .analyze-hero-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--green); margin-bottom: 16px; }
+    .analyze-hero-title { font-size: clamp(32px, 5vw, 48px); font-weight: 900; letter-spacing: -2px; line-height: 1.08; margin-bottom: 16px; color: rgba(227,233,246,0.2); }
+    .analyze-hero-title span { background: linear-gradient(135deg, #1ff18f, #0dcf72); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .analyze-hero-sub { font-size: 15px; color: var(--muted); line-height: 1.7; }
+
+    .analyze-body { max-width: 760px; margin: 0 auto; padding: 40px 24px 60px; }
+    .analyze-card { background: var(--bg2); border: 1px solid rgba(255,255,255,0.07); border-radius: 24px; padding: 36px; }
+
+    .upload-zone-pro { border: 2px dashed rgba(255,255,255,0.1); border-radius: 18px; padding: 64px 24px; text-align: center; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden; margin-bottom: 24px; background: var(--bg3); }
+    .upload-zone-pro:hover, .upload-zone-pro.drag { border-color: var(--green); background: rgba(31,241,143,0.04); }
+    .upload-zone-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 300px; height: 200px; background: radial-gradient(ellipse, rgba(31,241,143,0.06) 0%, transparent 70%); pointer-events: none; transition: opacity 0.3s; }
+    .upload-zone-pro:hover .upload-zone-glow { opacity: 2; }
+    .upload-zone-content { position: relative; }
+    .upload-icon-pro { font-size: 44px; margin-bottom: 16px; display: block; filter: drop-shadow(0 0 12px rgba(31,241,143,0.3)); }
+    .upload-zone-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .upload-zone-sub { font-size: 14px; color: var(--muted); }
+    .upload-browse { color: var(--green); font-weight: 600; }
+    .uploaded-preview-pro { text-align: center; font-size: 13px; font-weight: 600; color: var(--green); margin: -12px 0 20px; min-height: 20px; }
+
+    .analyze-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .analyze-btn-pro { width: 100%; padding: 17px; background: var(--green); color: #08090d; border: none; border-radius: 14px; font-size: 17px; font-weight: 800; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; box-shadow: 0 0 30px rgba(31,241,143,0.3); letter-spacing: -0.3px; }
+    .analyze-btn-pro:hover { background: #2fffa0; box-shadow: 0 0 40px rgba(31,241,143,0.45); transform: translateY(-1px); }
+    .analyze-btn-pro:disabled { background: var(--muted2); box-shadow: none; cursor: not-allowed; transform: none; }
+    .analyze-trust { display: flex; justify-content: center; gap: 24px; font-size: 12px; color: var(--muted2); font-weight: 600; flex-wrap: wrap; }
+    .analyze-trust span { display: flex; align-items: center; gap: 5px; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       nav { padding: 14px 20px; }
@@ -484,62 +514,70 @@
   </div>
 
   <!-- ── ANALYZE VIEW ── -->
-  <div id="view-analyze" class="dash-body" style="display:none">
-    <div class="dash-title">Analyze a Bet Slip</div>
-    <div class="dash-subtitle">Upload a screenshot, paste text, or enter legs manually.</div>
-
-    <div class="analyzer-card">
-      <div class="input-tabs">
-        <button class="input-tab active" onclick="switchInputTab('upload')">📸 Screenshot</button>
-        <button class="input-tab" onclick="switchInputTab('text')">📝 Paste Text</button>
-        <button class="input-tab" onclick="switchInputTab('manual')">✏️ Manual Entry</button>
+  <div id="view-analyze" style="display:none">
+    <div class="analyze-hero">
+      <div class="analyze-hero-inner">
+        <div class="analyze-hero-label">AI BET ANALYZER</div>
+        <h2 class="analyze-hero-title">Drop Your Bet Slip.<br><span>Get the Truth.</span></h2>
+        <p class="analyze-hero-sub">Our AI reads every leg, pulls real player stats, and grades your slip in under 5 seconds.</p>
       </div>
-      <div class="input-panel active" id="panel-upload">
-        <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-          <div class="upload-icon">📸</div>
-          <p><strong>Click to upload</strong> or drag & drop your bet slip</p>
-          <p style="margin-top:6px;font-size:12px">PNG, JPG, WEBP up to 10MB</p>
-          <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
-        </div>
-        <div class="uploaded-preview" id="file-preview"></div>
-      </div>
-      <div class="input-panel" id="panel-text">
-        <textarea class="form-textarea" id="bet-text" placeholder="Paste your bet slip text here...&#10;&#10;e.g. LeBron James Over 24.5 Points (-115)&#10;Stephen Curry Over 4.5 Threes (-110)"></textarea>
-      </div>
-      <div class="input-panel" id="panel-manual">
-        <div id="manual-legs">
-          <div class="form-group"><input type="text" class="form-input manual-leg" placeholder="Leg 1: e.g. LeBron James Over 24.5 Points"></div>
-          <div class="form-group"><input type="text" class="form-input manual-leg" placeholder="Leg 2: e.g. Curry Over 4.5 Threes"></div>
-        </div>
-        <button type="button" onclick="addManualLeg()" style="background:none;border:1px dashed rgba(255,255,255,0.15);color:var(--muted);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:8px">+ Add leg</button>
-      </div>
-      <div class="form-row" style="margin-top:20px">
-        <div class="form-group" style="margin:0">
-          <label class="form-label">Sport</label>
-          <select class="form-select" id="sport-select">
-            <option value="">Auto-detect</option>
-            <option value="NBA">NBA Basketball</option>
-            <option value="NFL">NFL Football</option>
-            <option value="MLB">MLB Baseball</option>
-            <option value="NHL">NHL Hockey</option>
-            <option value="UFC">UFC / MMA</option>
-            <option value="Soccer">Soccer</option>
-            <option value="Tennis">Tennis</option>
-          </select>
-        </div>
-        <div class="form-group" style="margin:0">
-          <label class="form-label">Extra context (optional)</label>
-          <input type="text" class="form-input" id="context-input" placeholder="e.g. Game 7, back-to-back night">
-        </div>
-      </div>
-      <div id="analyze-error" style="background:rgba(255,92,92,0.1);border:1px solid rgba(255,92,92,0.3);color:var(--danger);font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:12px;display:none"></div>
-      <button class="analyze-btn" id="analyze-btn" onclick="runAnalysis()">Analyze Bet →</button>
     </div>
 
-    <div id="results">
-      <div class="result-header" id="result-header"></div>
-      <div class="bets-grid" id="bets-grid"></div>
-      <div class="parlay-summary" id="parlay-summary"></div>
+    <div class="analyze-body">
+      <div class="analyze-card">
+        <div class="upload-zone-pro" id="drop-zone"
+          onclick="document.getElementById('file-input').click()"
+          ondragover="handleDragOver(event)"
+          ondragleave="handleDragLeave(event)"
+          ondrop="handleDrop(event)">
+          <div class="upload-zone-glow"></div>
+          <div class="upload-zone-content">
+            <div class="upload-icon-pro">📸</div>
+            <div class="upload-zone-title">Drop your bet slip here</div>
+            <div class="upload-zone-sub">or <span class="upload-browse">browse files</span> — PNG, JPG, WEBP up to 10MB</div>
+          </div>
+          <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)" style="display:none">
+        </div>
+        <div class="uploaded-preview-pro" id="file-preview"></div>
+
+        <div class="analyze-options">
+          <div class="form-group" style="margin:0;flex:1">
+            <label class="form-label">Sport</label>
+            <select class="form-select" id="sport-select">
+              <option value="">Auto-detect</option>
+              <option value="NBA">NBA Basketball</option>
+              <option value="NFL">NFL Football</option>
+              <option value="MLB">MLB Baseball</option>
+              <option value="NHL">NHL Hockey</option>
+              <option value="UFC">UFC / MMA</option>
+              <option value="Soccer">Soccer</option>
+              <option value="Tennis">Tennis</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;flex:1">
+            <label class="form-label">Extra context <span style="color:var(--muted2);font-weight:400">(optional)</span></label>
+            <input type="text" class="form-input" id="context-input" placeholder="e.g. Game 7, back-to-back night">
+          </div>
+        </div>
+
+        <div id="analyze-error" style="background:rgba(255,92,92,0.1);border:1px solid rgba(255,92,92,0.3);color:var(--danger);font-size:13px;padding:12px 16px;border-radius:10px;margin-bottom:12px;display:none"></div>
+
+        <button class="analyze-btn-pro" id="analyze-btn" onclick="runAnalysis()">
+          <span id="analyze-btn-text">Analyze Bet Slip →</span>
+        </button>
+
+        <div class="analyze-trust">
+          <span>⚡ Under 5 seconds</span>
+          <span>📊 Real player stats</span>
+          <span>🎯 A–F grade + EV rating</span>
+        </div>
+      </div>
+
+      <div id="results" style="display:none;margin-top:0">
+        <div class="result-header" id="result-header"></div>
+        <div class="bets-grid" id="bets-grid"></div>
+        <div class="parlay-summary" id="parlay-summary"></div>
+      </div>
     </div>
   </div>
 
@@ -949,28 +987,16 @@
     const sport = document.getElementById('sport-select').value;
     const context = document.getElementById('context-input').value;
 
-    // Build form data
+    if (!selectedFile) { showAnalyzeError('Please upload a bet slip image first.'); return; }
+
     const fd = new FormData();
-    fd.append('inputMode', currentInputMode);
+    fd.append('inputMode', 'upload');
     fd.append('sport', sport);
     fd.append('context', context);
-
-    if (currentInputMode === 'upload') {
-      if (!selectedFile) { showAnalyzeError('Please select a bet slip image.'); return; }
-      fd.append('image', selectedFile);
-    } else if (currentInputMode === 'text') {
-      const txt = document.getElementById('bet-text').value.trim();
-      if (!txt) { showAnalyzeError('Please paste your bet slip text.'); return; }
-      fd.append('betText', txt);
-    } else {
-      const legs = Array.from(document.querySelectorAll('.manual-leg'))
-        .map(i => i.value.trim()).filter(Boolean);
-      if (!legs.length) { showAnalyzeError('Please enter at least one bet leg.'); return; }
-      fd.append('manualLegs', JSON.stringify(legs));
-    }
+    fd.append('image', selectedFile);
 
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+    btn.innerHTML = '<span class="spinner"></span> Analyzing your bet slip...';
     document.getElementById('results').style.display = 'none';
 
     try {
@@ -981,7 +1007,7 @@
       showAnalyzeError(err.message);
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Analyze Bet →';
+      btn.innerHTML = '<span id="analyze-btn-text">Analyze Bet Slip →</span>';
     }
   }
 
