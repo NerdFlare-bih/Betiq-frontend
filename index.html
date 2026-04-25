@@ -202,63 +202,75 @@
     .history-grade { font-size: 22px; font-weight: 900; }
 
     /* ── DASH TABS ── */
-    .dash-tabs { display: flex; gap: 4px; padding: 0 40px; border-bottom: 1px solid rgba(255,255,255,0.05); background: var(--bg); }
-    .dash-tab { padding: 14px 20px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; display: flex; align-items: center; gap: 7px; }
-    .dash-tab:hover { color: var(--text); }
+    .dash-tabs { display: flex; gap: 2px; padding: 0 40px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(8,9,13,0.6); backdrop-filter: blur(10px); }
+    .dash-tab { padding: 15px 22px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; display: flex; align-items: center; gap: 7px; letter-spacing: 0.1px; }
+    .dash-tab:hover { color: var(--text); background: rgba(255,255,255,0.02); border-radius: 8px 8px 0 0; }
     .dash-tab.active { color: var(--green); border-bottom-color: var(--green); }
 
     /* ── HOME FEED ── */
-    .home-feed { max-width: 900px; margin: 0 auto; padding: 36px 24px; }
-    .home-greeting { margin-bottom: 32px; }
-    .home-greeting h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
-    .home-greeting p { font-size: 14px; color: var(--muted); }
+    .home-feed { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
 
-    .quick-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 40px; }
-    .quick-stat { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 18px 20px; }
-    .quick-stat-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; margin-bottom: 8px; }
-    .quick-stat-value { font-size: 26px; font-weight: 900; letter-spacing: -1px; color: var(--text); }
-    .quick-stat-value.green { color: var(--green); }
-    .quick-stat-sub { font-size: 12px; color: var(--muted2); margin-top: 3px; }
+    .home-banner { position: relative; overflow: hidden; background: linear-gradient(135deg, var(--bg2) 0%, rgba(31,241,143,0.04) 100%); border: 1px solid rgba(31,241,143,0.12); border-radius: 20px; padding: 32px 36px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; }
+    .home-banner::before { content: ''; position: absolute; top: -60px; right: -60px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(31,241,143,0.07) 0%, transparent 70%); pointer-events: none; }
+    .home-banner-left h2 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .home-banner-left p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+    .home-banner-btn { background: var(--green); color: #08090d; border: none; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; margin-left: 24px; transition: all 0.2s; box-shadow: 0 0 20px rgba(31,241,143,0.25); }
+    .home-banner-btn:hover { background: #2fffa0; transform: translateY(-1px); box-shadow: 0 0 28px rgba(31,241,143,0.4); }
 
-    .feed-section { margin-bottom: 40px; }
-    .feed-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .feed-section-title { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
-    .feed-section-sub { font-size: 12px; color: var(--muted2); }
-    .feed-section-action { font-size: 13px; color: var(--green); cursor: pointer; font-weight: 600; }
-    .feed-section-action:hover { text-decoration: underline; }
+    .quick-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 44px; }
+    .quick-stat { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px 22px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
+    .quick-stat:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-1px); }
+    .quick-stat::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green), transparent); opacity: 0; transition: opacity 0.2s; }
+    .quick-stat:hover::after { opacity: 1; }
+    .quick-stat-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; margin-bottom: 10px; }
+    .quick-stat-value { font-size: 28px; font-weight: 900; letter-spacing: -1.5px; color: var(--text); line-height: 1; }
+    .quick-stat-value.green { background: linear-gradient(135deg, #1ff18f, #0dcf72); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .quick-stat-sub { font-size: 12px; color: var(--muted2); margin-top: 6px; }
+
+    .feed-section { margin-bottom: 44px; }
+    .feed-section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; }
+    .feed-section-title { font-size: 17px; font-weight: 800; letter-spacing: -0.4px; }
+    .feed-section-sub { font-size: 12px; color: var(--muted2); margin-top: 3px; font-weight: 400; }
+    .feed-section-action { font-size: 13px; color: var(--green); cursor: pointer; font-weight: 600; padding: 6px 12px; border-radius: 8px; background: var(--green-dim); border: 1px solid rgba(31,241,143,0.15); transition: all 0.2s; }
+    .feed-section-action:hover { background: rgba(31,241,143,0.18); }
 
     .trending-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .trending-card { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
-    .trending-card:hover { border-color: rgba(31,241,143,0.2); transform: translateY(-1px); }
+    .trending-card { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .trending-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--green), transparent); opacity: 0; transition: opacity 0.2s; }
+    .trending-card:hover { border-color: rgba(31,241,143,0.2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .trending-card:hover::before { opacity: 1; }
     .trending-left { flex: 1; }
-    .trending-sport { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; margin-bottom: 5px; }
-    .trending-player { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .trending-sport { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .trending-hot { background: rgba(245,166,35,0.15); color: var(--warn); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px; }
+    .trending-player { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
     .trending-line { font-size: 13px; color: var(--muted); }
-    .trending-right { text-align: right; flex-shrink: 0; margin-left: 16px; }
-    .trending-prob { font-size: 22px; font-weight: 900; }
-    .trending-prob.high { color: var(--green); }
+    .trending-right { text-align: right; flex-shrink: 0; margin-left: 20px; }
+    .trending-prob { font-size: 26px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+    .trending-prob.high { background: linear-gradient(135deg, #1ff18f, #0dcf72); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .trending-prob.mid { color: var(--warn); }
-    .trending-ev { font-size: 11px; font-weight: 700; margin-top: 2px; }
-    .trending-ev.pos { color: var(--green); }
-    .trending-ev.neg { color: var(--danger); }
+    .trending-ev { font-size: 11px; font-weight: 700; margin-top: 4px; padding: 2px 8px; border-radius: 8px; display: inline-block; }
+    .trending-ev.pos { background: rgba(31,241,143,0.1); color: var(--green); }
+    .trending-ev.neg { background: rgba(255,92,92,0.1); color: var(--danger); }
 
     .sport-spotlight { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-    .sport-card-feed { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 18px; text-align: center; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
-    .sport-card-feed:hover { border-color: rgba(31,241,143,0.2); transform: translateY(-2px); }
-    .sport-card-emoji { font-size: 28px; margin-bottom: 8px; }
-    .sport-card-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-    .sport-card-status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; display: inline-block; }
-    .sport-card-status.live { background: rgba(31,241,143,0.12); color: var(--green); }
-    .sport-card-status.off { background: rgba(113,131,160,0.12); color: var(--muted2); }
+    .sport-card-feed { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .sport-card-feed::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(31,241,143,0.04), transparent); opacity: 0; transition: opacity 0.2s; border-radius: 16px; }
+    .sport-card-feed:hover { border-color: rgba(31,241,143,0.25); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .sport-card-feed:hover::after { opacity: 1; }
+    .sport-card-emoji { font-size: 30px; margin-bottom: 10px; display: block; }
+    .sport-card-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .sport-card-status { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; display: inline-block; letter-spacing: 0.5px; }
+    .sport-card-status.live { background: rgba(31,241,143,0.12); color: var(--green); border: 1px solid rgba(31,241,143,0.2); }
+    .sport-card-status.off { background: rgba(113,131,160,0.1); color: var(--muted2); border: 1px solid rgba(113,131,160,0.15); }
 
     .recent-feed { display: flex; flex-direction: column; gap: 10px; }
-    .recent-feed-item { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color 0.2s; }
-    .recent-feed-item:hover { border-color: rgba(255,255,255,0.15); }
-    .recent-feed-sport { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); margin-bottom: 4px; text-transform: uppercase; }
+    .recent-feed-item { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; }
+    .recent-feed-item:hover { border-color: rgba(255,255,255,0.12); transform: translateX(3px); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+    .recent-feed-sport { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted2); margin-bottom: 5px; text-transform: uppercase; }
     .recent-feed-date { font-size: 13px; color: var(--muted); }
-    .recent-feed-grade { font-size: 24px; font-weight: 900; }
-    .empty-state { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
-    .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .recent-feed-grade { font-size: 28px; font-weight: 900; min-width: 36px; text-align: right; }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; background: var(--bg2); border: 1px dashed rgba(255,255,255,0.08); border-radius: 16px; }
+    .empty-state .empty-icon { font-size: 40px; margin-bottom: 14px; display: block; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
@@ -410,9 +422,12 @@
 
   <!-- ── HOME FEED ── -->
   <div id="view-home" class="home-feed">
-    <div class="home-greeting">
-      <h2 id="home-greeting-text">Welcome back 👋</h2>
-      <p>Here's what's happening in sports betting today.</p>
+    <div class="home-banner">
+      <div class="home-banner-left">
+        <h2 id="home-greeting-text">Welcome back 👋</h2>
+        <p>Here's what's happening in sports betting today.<br>Ready to find your edge?</p>
+      </div>
+      <button class="home-banner-btn" onclick="switchDashTab('analyze')">Analyze a Bet →</button>
     </div>
 
     <div class="quick-stats">
@@ -665,11 +680,12 @@
       { sport: 'Premier League', player: 'Erling Haaland', line: 'Anytime Goalscorer', prob: 48, ev: '-EV' },
     ];
     document.getElementById('trending-grid').innerHTML = bets.map(b => {
-      const pc = b.prob >= 60 ? 'high' : b.prob >= 45 ? 'mid' : 'mid';
+      const pc = b.prob >= 60 ? 'high' : 'mid';
       const evc = b.ev === '+EV' ? 'pos' : 'neg';
+      const hot = b.prob >= 65 ? '<span class="trending-hot">🔥 HOT</span>' : '';
       return `<div class="trending-card" onclick="prefillAndAnalyze('${b.sport}','${b.player} ${b.line}')">
         <div class="trending-left">
-          <div class="trending-sport">${b.sport}</div>
+          <div class="trending-sport">${b.sport} ${hot}</div>
           <div class="trending-player">${b.player}</div>
           <div class="trending-line">${b.line}</div>
         </div>
