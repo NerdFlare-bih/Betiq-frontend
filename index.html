@@ -26,10 +26,12 @@
 
     /* ── NAV ── */
     nav {
-      display: flex; align-items: center; justify-content: space-between;
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
       padding: 18px 48px; border-bottom: 1px solid rgba(255,255,255,0.05);
       position: sticky; top: 0; background: rgba(8,9,13,0.85); backdrop-filter: blur(20px); z-index: 100;
     }
+    .nav-links { justify-self: center; }
+    .nav-right { justify-self: end; }
     .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
     .logo span { color: var(--green); }
     .nav-links { display: flex; align-items: center; gap: 36px; }
