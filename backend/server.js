@@ -99,6 +99,133 @@ async function checkAndDeductCredit(req, res, next) {
   next();
 }
 
+// ── PASS 1: EXTRACT PLAYER NAMES + BET LINES FROM IMAGE ──
+// Uses fast/cheap Haiku so total latency stays low.
+async function extractLegsFromContent(content) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 400,
+        temperature: 0,
+        messages: [{ role: 'user', content: [
+          ...content,
+          { type: 'text', text: 'List every bet leg on this slip. Return ONLY a raw JSON array, no markdown:\n[{"player":"Full Name","line":"Over 25.5 Points","team":"MIN","sport":"NBA"}]' }
+        ]}]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.[0]?.text?.trim() || '[]';
+    const start = raw.indexOf('[');
+    const end = raw.lastIndexOf(']');
+    if (start === -1) return [];
+    return JSON.parse(raw.slice(start, end + 1));
+  } catch { return []; }
+}
+
+// ── NBA REAL STATS: BallDontLie API ──
+async function fetchNBAStats(playerName) {
+  const apiKey = process.env.BALLDONTLIE_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const searchRes = await fetch(
+      `https://api.balldontlie.io/v1/players?search=${encodeURIComponent(playerName)}&per_page=5`,
+      { headers: { 'Authorization': apiKey } }
+    );
+    const searchData = await searchRes.json();
+    if (!searchData.data?.length) return null;
+    const player = searchData.data[0];
+
+    const avgRes = await fetch(
+      `https://api.balldontlie.io/v1/season_averages?season=2024&player_ids[]=${player.id}`,
+      { headers: { 'Authorization': apiKey } }
+    );
+    const avgData = await avgRes.json();
+    const avg = avgData.data?.[0];
+    if (!avg) return null;
+
+    return {
+      player: `${player.first_name} ${player.last_name}`,
+      team: player.team?.abbreviation || '',
+      pts: avg.pts, reb: avg.reb, ast: avg.ast,
+      games_played: avg.games_played, min: avg.min,
+      fg_pct: avg.fg_pct ? (avg.fg_pct * 100).toFixed(1) + '%' : null,
+      fg3_pct: avg.fg3_pct ? (avg.fg3_pct * 100).toFixed(1) + '%' : null,
+    };
+  } catch { return null; }
+}
+
+// ── MLB REAL STATS: Official MLB Stats API (no key required) ──
+async function fetchMLBStats(playerName) {
+  try {
+    const searchRes = await fetch(
+      `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(playerName)}&sportId=1`
+    );
+    const searchData = await searchRes.json();
+    const person = searchData.people?.[0];
+    if (!person) return null;
+
+    const statsRes = await fetch(
+      `https://statsapi.mlb.com/api/v1/people/${person.id}/stats?stats=season&season=2025&group=hitting`
+    );
+    const statsData = await statsRes.json();
+    const s = statsData.stats?.[0]?.splits?.[0]?.stat;
+    if (!s) return null;
+
+    return {
+      player: person.fullName,
+      avg: s.avg, hr: s.homeRuns, rbi: s.rbi,
+      hits: s.hits, atBats: s.atBats, ops: s.ops,
+      strikeOuts: s.strikeOuts, games_played: s.gamesPlayed
+    };
+  } catch { return null; }
+}
+
+// ── NHL REAL STATS: Official NHL API (no key required) ──
+async function fetchNHLStats(playerName) {
+  try {
+    const searchRes = await fetch(
+      `https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=5&q=${encodeURIComponent(playerName)}&active=true`
+    );
+    const players = await searchRes.json();
+    if (!players?.length) return null;
+    const p = players[0];
+
+    const statsRes = await fetch(`https://api-web.nhle.com/v1/player/${p.playerId}/landing`);
+    const data = await statsRes.json();
+    const season = data.seasonTotals?.find(s => s.season === 20242025 && s.leagueAbbrev === 'NHL');
+    if (!season) return null;
+
+    return {
+      player: `${p.name}`,
+      team: p.teamAbbrev,
+      goals: season.goals, assists: season.assists,
+      points: season.points, games_played: season.gamesPlayed,
+      plusMinus: season.plusMinus, shots: season.shots
+    };
+  } catch { return null; }
+}
+
+// ── BUILD STATS CONTEXT STRING FOR CLAUDE PROMPT ──
+function buildStatsContext(enrichedLegs) {
+  const lines = enrichedLegs.filter(l => l.realStats).map(l => {
+    const s = l.realStats;
+    const statStr = Object.entries(s)
+      .filter(([k]) => !['player','team'].includes(k))
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(', ');
+    return `${s.player}${s.team ? ' (' + s.team + ')' : ''}: ${statStr}`;
+  });
+  if (!lines.length) return '';
+  return `\n\nVERIFIED LIVE ${new Date().getFullYear()} SEASON STATS — use these EXACT numbers in your analysis, do not override or estimate:\n${lines.join('\n')}`;
+}
+
 // ── ANALYZE ENDPOINT ──
 app.post('/api/analyze', requireAuth, checkAndDeductCredit, upload.single('image'), async (req, res) => {
   try {
@@ -153,7 +280,34 @@ app.post('/api/analyze', requireAuth, checkAndDeductCredit, upload.single('image
       return res.status(400).json({ error: 'No bet data provided' });
     }
 
-    // Call Anthropic API
+    // ── PASS 1: Extract legs + fetch real stats ──
+    // Run extraction + all stat fetches in parallel so latency is minimal.
+    const isNBA = /nba|basketball/i.test(sport || '');
+    const isMLB = /mlb|baseball/i.test(sport || '');
+    const isNHL = /nhl|hockey/i.test(sport || '');
+
+    let statsContext = '';
+    try {
+      const legs = await extractLegsFromContent(content);
+      if (legs.length) {
+        const enriched = await Promise.all(legs.map(async leg => {
+          let realStats = null;
+          if (isNBA || leg.sport === 'NBA') realStats = await fetchNBAStats(leg.player);
+          else if (isMLB || leg.sport === 'MLB') realStats = await fetchMLBStats(leg.player);
+          else if (isNHL || leg.sport === 'NHL') realStats = await fetchNHLStats(leg.player);
+          return { ...leg, realStats };
+        }));
+        statsContext = buildStatsContext(enriched);
+      }
+    } catch { /* stats enrichment is best-effort — never block analysis */ }
+
+    // Append verified stats to the last content text block
+    if (statsContext) {
+      const lastText = content.findLast(c => c.type === 'text');
+      if (lastText) lastText.text += statsContext;
+    }
+
+    // ── PASS 2: Full analysis with real stats injected ──
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
