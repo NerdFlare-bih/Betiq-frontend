@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const crypto = require('crypto');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
@@ -8,6 +9,11 @@ const path = require('path');
 
 const app = express();
 const upload = multer({ limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
+
+// ── ANALYSIS CACHE ──
+// Keyed by SHA-256 hash of (image bytes + sport + context).
+// Same slip submitted again returns the identical result instantly — no AI call, no credit used.
+const analysisCache = new Map();
 
 // Supabase client
 const supabase = createClient(
@@ -79,7 +85,7 @@ async function checkAndDeductCredit(req, res, next) {
   }
 
   // Check limits
-  const limit = profile.plan === 'pro' ? 999 : profile.plan === 'sharp' ? 9999 : 3;
+  const limit = profile.plan === 'pro' ? 10 : profile.plan === 'sharp' ? 9999 : 1;
   if (profile.analyses_today >= limit) {
     return res.status(429).json({
       error: 'Daily limit reached',
@@ -98,6 +104,37 @@ app.post('/api/analyze', requireAuth, checkAndDeductCredit, upload.single('image
   try {
     const { sport, context, betText, manualLegs, inputMode } = req.body;
     const imageFile = req.file;
+
+    // ── CACHE CHECK ──
+    // Hash the raw input so identical submissions always return the same result.
+    const hashInput = [
+      imageFile ? imageFile.buffer : Buffer.from(betText || manualLegs || ''),
+      sport || '',
+      context || ''
+    ];
+    const cacheKey = crypto.createHash('sha256')
+      .update(Buffer.concat(hashInput.map(i => Buffer.isBuffer(i) ? i : Buffer.from(String(i)))))
+      .digest('hex');
+
+    // 1. Check in-memory cache (fastest — same server session)
+    if (analysisCache.has(cacheKey)) {
+      return res.json({ success: true, data: analysisCache.get(cacheKey), cached: true });
+    }
+
+    // 2. Check persistent DB cache (survives server restarts — global, not per-user)
+    const { data: dbCached } = await supabase
+      .from('analyses')
+      .select('result')
+      .filter('result->>_cache_key', 'eq', cacheKey)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (dbCached?.result) {
+      const { _cache_key, ...cleanResult } = dbCached.result;
+      analysisCache.set(cacheKey, cleanResult); // warm memory cache too
+      return res.json({ success: true, data: cleanResult, cached: true });
+    }
 
     // Build message content for Claude
     const content = [];
@@ -127,6 +164,7 @@ app.post('/api/analyze', requireAuth, checkAndDeductCredit, upload.single('image
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
         max_tokens: 4000,
+        temperature: 0,
         system: getSystemPrompt(),
         messages: [{ role: 'user', content }]
       })
@@ -155,17 +193,20 @@ app.post('/api/analyze', requireAuth, checkAndDeductCredit, upload.single('image
       result = JSON.parse(fixed);
     }
 
+    // Store clean result in memory cache
+    analysisCache.set(cacheKey, result);
+
     // Deduct one credit
     await supabase
       .from('profiles')
       .update({ analyses_today: req.profile.analyses_today + 1 })
       .eq('id', req.user.id);
 
-    // Save analysis to history
+    // Save to history with cache key embedded so DB lookups work after restarts
     await supabase.from('analyses').insert({
       user_id: req.user.id,
       sport,
-      result,
+      result: { ...result, _cache_key: cacheKey },
       created_at: new Date().toISOString()
     });
 
@@ -244,7 +285,7 @@ app.get('/api/me', requireAuth, async (req, res) => {
     .eq('id', req.user.id)
     .single();
 
-  const limits = { free: 3, pro: 999, sharp: 9999 };
+  const limits = { free: 1, pro: 10, sharp: 9999 };
   const plan = profile?.plan || 'free';
   const used = profile?.analyses_today || 0;
   const limit = limits[plan];
@@ -347,10 +388,24 @@ Required schema:
   }
 }
 
-Grade scale: A=65%+, B=50-64%, C=35-49%, D=20-34%, F=below 20%.
-For single bets, combined_probability equals that bet's probability.
-EV: if model probability > sportsbook implied probability → +EV, else -EV.
-Use specific, real current-season stats. Be data-driven and trust-building.`;
+PROBABILITY METHODOLOGY — follow this exactly every time:
+1. Start with the player's hit rate over their last 10 games for this specific stat line (weight: 55%)
+2. Blend with season-long hit rate for this line (weight: 25%)
+3. Adjust for matchup — opponent's defensive rank vs this stat (weight: 20%)
+4. Round every individual probability to the nearest 5% (e.g. 63% → 65%, 71% → 70%)
+5. Combined parlay probability = multiply all individual probabilities together, then round to nearest 5%
+
+Grade scale (based on combined_probability):
+A = 65%+, B = 50–64%, C = 35–49%, D = 20–34%, F = below 20%
+
+EV rule: if your calculated probability > sportsbook implied probability → +EV, else -EV
+Sportsbook implied probability = 100 / (American odds + 100) for positive odds, or |odds| / (|odds| + 100) for negative odds.
+
+CONSISTENCY RULES:
+- Always apply the same formula above — do not deviate
+- If you are uncertain about a stat, default to league-average hit rate for that line
+- Never adjust probabilities based on "feel" — only the formula
+- Use specific current-season stats. Be data-driven.`;
 }
 
 // Catch-all: serve frontend
