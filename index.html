@@ -91,6 +91,14 @@
     /* ── TICKER ── */
     .ticker-wrap { display: none; }
 
+    /* ── TRUST BAR ── */
+    .trust-bar { background: linear-gradient(180deg, #05070d 0%, #090c15 100%); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 64px 24px; }
+    .trust-bar-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .trust-stat { text-align: center; }
+    .trust-stat-value { font-size: 38px; font-weight: 800; color: var(--text); letter-spacing: -1px; margin-bottom: 18px; }
+    .trust-stat-dash { width: 28px; height: 3px; background: var(--green); border-radius: 2px; margin: 0 auto 18px; }
+    .trust-stat-label { font-size: 12px; font-weight: 600; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; }
+
     /* ── FEATURES ── */
     .features { padding: 80px 24px; max-width: 1100px; margin: 0 auto; border-top: 1px solid rgba(255,255,255,0.05); }
     .section-label { font-size: 13px; font-weight: 600; letter-spacing: 0.2px; color: var(--green); margin-bottom: 16px; }
@@ -445,6 +453,9 @@
       .form-row { grid-template-columns: 1fr; }
       .result-header { flex-direction: column; }
       .stats { gap: 32px; }
+      .trust-bar { padding: 40px 20px; }
+      .trust-bar-inner { grid-template-columns: repeat(2, 1fr); gap: 32px 16px; }
+      .trust-stat-value { font-size: 30px; }
       .upgrade-plans { grid-template-columns: 1fr; }
       .quick-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
       .quick-stat { padding: 18px 20px; }
@@ -583,6 +594,31 @@
       <div class="feature-card"><div class="feature-icon">🏆</div><div class="feature-title">6+ sports covered</div><div class="feature-desc">NBA, NFL, MLB, NHL, Premier League, UFC, ATP/WTA. Year-round coverage, never an offseason.</div></div>
     </div>
   </section>
+
+  <div class="trust-bar">
+    <div class="trust-bar-inner">
+      <div class="trust-stat">
+        <div class="trust-stat-value">6+</div>
+        <div class="trust-stat-dash"></div>
+        <div class="trust-stat-label">Sports Supported</div>
+      </div>
+      <div class="trust-stat">
+        <div class="trust-stat-value">100%</div>
+        <div class="trust-stat-dash"></div>
+        <div class="trust-stat-label">Real Player Stats</div>
+      </div>
+      <div class="trust-stat">
+        <div class="trust-stat-value">0%</div>
+        <div class="trust-stat-dash"></div>
+        <div class="trust-stat-label">Guesswork</div>
+      </div>
+      <div class="trust-stat">
+        <div class="trust-stat-value">24/7</div>
+        <div class="trust-stat-dash"></div>
+        <div class="trust-stat-label">Always Available</div>
+      </div>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <div class="footer-inner">
