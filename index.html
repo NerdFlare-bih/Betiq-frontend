@@ -12,6 +12,17 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="BetIQ: AI Sports Bet Analyzer">
   <meta name="twitter:description" content="Stop guessing. Upload your bet slip and get real probability, EV rating, and an A–F grade powered by AI.">
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#020206">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BetIQ">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -1636,6 +1647,13 @@
       btn.disabled = false;
       btn.textContent = '📌 Save to Bet Tracker';
     }
+  }
+
+  // ── PWA: register service worker ──
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
   }
 </script>
 </body>
