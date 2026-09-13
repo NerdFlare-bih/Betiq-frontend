@@ -1381,6 +1381,13 @@
     // If email confirmation is required, data.session will be null
     if (data.session) {
       // Auto-confirmed — onAuthStateChange handles navigation
+    } else if (data.user && data.user.identities && data.user.identities.length === 0) {
+      // Supabase returns success with no error here even for an existing,
+      // already-confirmed email (anti account-enumeration) — no email is
+      // actually sent, so don't show the "check your email" screen.
+      // switchTab() clears auth messages, so switch first, then show the error.
+      switchTab('login');
+      showAuthError('An account with this email already exists. Try logging in instead.');
     } else {
       showSignupConfirmScreen(email);
     }
