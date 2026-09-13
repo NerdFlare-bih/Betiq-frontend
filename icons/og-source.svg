@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow1" cx="15%" cy="0%" r="60%">
+      <stop offset="0%" stop-color="#1ff18f" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#1ff18f" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="90%" cy="100%" r="60%">
+      <stop offset="0%" stop-color="#14327a" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#14327a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3dffb8"/>
+      <stop offset="45%" stop-color="#1ff18f"/>
+      <stop offset="100%" stop-color="#0dcf72"/>
+    </linearGradient>
+    <filter id="textGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="chevGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="#020206"/>
+  <rect width="1200" height="630" fill="url(#glow1)"/>
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+
+  <!-- logo mark -->
+  <g filter="url(#chevGlow)">
+    <path d="M 84 58 L 106 78 L 84 98" fill="none" stroke="url(#green)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="122" y="87" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="34" font-weight="800" fill="#f2f6ff" letter-spacing="-0.5">Bet<tspan fill="#1ff18f">IQ</tspan></text>
+
+  <!-- headline -->
+  <text x="80" y="290" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="96" font-weight="900" letter-spacing="-3" fill="#f2f6ff">Stop Guessing.</text>
+  <text x="80" y="400" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="96" font-weight="900" letter-spacing="-3" fill="url(#green)" filter="url(#textGlow)">Start Winning.</text>
+
+  <!-- subtitle -->
+  <text x="82" y="470" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="27" font-weight="400" fill="#8a9ab5">AI-powered bet analysis. Real player stats. A–F grade in seconds.</text>
+
+  <!-- trust chips -->
+  <g font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="600" fill="#5b6c86">
+    <text x="82" y="550">NBA</text>
+    <text x="162" y="550">NFL</text>
+    <text x="238" y="550">MLB</text>
+    <text x="312" y="550">NHL</text>
+    <text x="390" y="550">UFC</text>
+    <text x="456" y="550">SOCCER</text>
+  </g>
+  <circle cx="90" cy="544" r="3" fill="#1ff18f"/>
+  <circle cx="170" cy="544" r="3" fill="#1ff18f"/>
+  <circle cx="246" cy="544" r="3" fill="#1ff18f"/>
+  <circle cx="320" cy="544" r="3" fill="#1ff18f"/>
+  <circle cx="398" cy="544" r="3" fill="#1ff18f"/>
+</svg>
