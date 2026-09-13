@@ -289,8 +289,9 @@
       window.location.href = 'index.html';
       return;
     }
+    const billing = isAnnual ? 'annual' : 'monthly';
     if (!currentSession) {
-      window.location.href = 'index.html?signup=true&plan=' + plan;
+      window.location.href = 'index.html?signup=true&plan=' + plan + '&billing=' + billing;
       return;
     }
     showStatus('Redirecting to checkout...', 'success');
@@ -301,7 +302,7 @@
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + currentSession.access_token
         },
-        body: JSON.stringify({ plan })
+        body: JSON.stringify({ plan, billing })
       });
       const data = await res.json();
       if (data.url) {
