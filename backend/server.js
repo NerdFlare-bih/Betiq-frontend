@@ -212,6 +212,98 @@ async function fetchNHLStats(playerName) {
   } catch { return null; }
 }
 
+// ── SHARED ESPN ATHLETE SEARCH (no key required) ──
+async function espnSearchAthleteId(playerName, sportFilter) {
+  try {
+    const res = await fetch(`https://site.web.api.espn.com/apis/search/v2?query=${encodeURIComponent(playerName)}&limit=10`);
+    const data = await res.json();
+    const playerResults = data.results?.find(r => r.type === 'player');
+    const contents = playerResults?.contents || [];
+    if (!contents.length) return null;
+    const match = sportFilter ? (contents.find(c => c.sport === sportFilter) || contents[0]) : contents[0];
+    const idMatch = match.link?.web?.match(/\/id\/(\d+)\//);
+    return idMatch ? idMatch[1] : null;
+  } catch { return null; }
+}
+
+// Picks the most recent season entry from an ESPN stat category (season ordering is inconsistent across sports)
+function latestSeasonStats(category) {
+  if (!category.statistics?.length) return null;
+  const latest = category.statistics.reduce((a, b) => (a.season.year >= b.season.year ? a : b));
+  const out = {};
+  category.names.forEach((name, i) => { out[name] = latest.stats[i]; });
+  return out;
+}
+
+// ── NFL REAL STATS: ESPN unofficial API (no key required) ──
+async function fetchNFLStats(playerName) {
+  try {
+    const id = await espnSearchAthleteId(playerName, 'football');
+    if (!id) return null;
+    const res = await fetch(`https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/athletes/${id}/stats`);
+    const data = await res.json();
+
+    const wanted = ['passing', 'rushing', 'receiving'];
+    const stats = { player: playerName };
+    let hasData = false;
+    for (const cat of data.categories || []) {
+      if (!wanted.includes(cat.name)) continue;
+      const s = latestSeasonStats(cat);
+      if (!s || s.gamesPlayed === '0') continue;
+      Object.entries(s).forEach(([k, v]) => { if (k !== 'gamesPlayed') stats[`${cat.name}_${k}`] = v; });
+      stats.games_played = s.gamesPlayed;
+      hasData = true;
+    }
+    return hasData ? stats : null;
+  } catch { return null; }
+}
+
+// ── SOCCER REAL STATS: ESPN unofficial API (no key required) ──
+async function fetchSoccerStats(playerName) {
+  try {
+    const id = await espnSearchAthleteId(playerName, 'soccer');
+    if (!id) return null;
+    const res = await fetch(`https://site.web.api.espn.com/apis/common/v3/sports/soccer/athletes/${id}/stats`);
+    const data = await res.json();
+    const cat = data.categories?.[0];
+    const s = cat ? latestSeasonStats(cat) : null;
+    if (!s) return null;
+
+    return {
+      player: playerName,
+      starts: s.STRT, goals: s.G, assists: s.A,
+      shots: s.SHOT, shots_on_goal: s.SOG,
+      yellow_cards: s.YC, red_cards: s.RC
+    };
+  } catch { return null; }
+}
+
+// ── UFC/MMA REAL STATS: ESPN unofficial API (no key required) ──
+// No free API exposes per-round strike data — career record and finish rate are what's available.
+async function fetchUFCStats(playerName) {
+  try {
+    const id = await espnSearchAthleteId(playerName, 'mma');
+    if (!id) return null;
+    const res = await fetch(`https://site.web.api.espn.com/apis/common/v3/sports/mma/ufc/athletes/${id}`);
+    const data = await res.json();
+    const a = data.athlete;
+    if (!a) return null;
+
+    const summary = {};
+    (a.statsSummary?.statistics || []).forEach(s => { summary[s.abbreviation] = s.displayValue; });
+    if (!Object.keys(summary).length) return null;
+
+    return {
+      player: a.displayName,
+      weight_class: a.weightClass?.text || null,
+      stance: a.stance || null,
+      record_w_l_d: summary['W-L-D'] || null,
+      ko_tko_record: summary['(T)KO'] || null,
+      submission_record: summary['SUB'] || null
+    };
+  } catch { return null; }
+}
+
 // ── BUILD STATS CONTEXT STRING FOR CLAUDE PROMPT ──
 function buildStatsContext(enrichedLegs) {
   const lines = enrichedLegs.filter(l => l.realStats).map(l => {
@@ -223,7 +315,7 @@ function buildStatsContext(enrichedLegs) {
     return `${s.player}${s.team ? ' (' + s.team + ')' : ''}: ${statStr}`;
   });
   if (!lines.length) return '';
-  return `\n\nVERIFIED LIVE ${new Date().getFullYear()} SEASON STATS — use these EXACT numbers in your analysis, do not override or estimate:\n${lines.join('\n')}`;
+  return `\n\nVERIFIED LIVE ${new Date().getFullYear()} SEASON STATS (use these EXACT numbers in your analysis, do not override or estimate):\n${lines.join('\n')}`;
 }
 
 // ── ANALYZE ENDPOINT ──
@@ -285,6 +377,9 @@ app.post('/api/analyze', requireAuth, checkAndDeductCredit, upload.single('image
     const isNBA = /nba|basketball/i.test(sport || '');
     const isMLB = /mlb|baseball/i.test(sport || '');
     const isNHL = /nhl|hockey/i.test(sport || '');
+    const isNFL = /nfl|football/i.test(sport || '');
+    const isSoccer = /soccer|premier league|mls|la liga|bundesliga|serie a|champions league/i.test(sport || '');
+    const isUFC = /ufc|mma/i.test(sport || '');
 
     let statsContext = '';
     try {
@@ -295,6 +390,9 @@ app.post('/api/analyze', requireAuth, checkAndDeductCredit, upload.single('image
           if (isNBA || leg.sport === 'NBA') realStats = await fetchNBAStats(leg.player);
           else if (isMLB || leg.sport === 'MLB') realStats = await fetchMLBStats(leg.player);
           else if (isNHL || leg.sport === 'NHL') realStats = await fetchNHLStats(leg.player);
+          else if (isNFL || leg.sport === 'NFL') realStats = await fetchNFLStats(leg.player);
+          else if (isSoccer || leg.sport === 'Soccer') realStats = await fetchSoccerStats(leg.player);
+          else if (isUFC || leg.sport === 'UFC' || leg.sport === 'MMA') realStats = await fetchUFCStats(leg.player);
           return { ...leg, realStats };
         }));
         statsContext = buildStatsContext(enriched);
@@ -535,8 +633,8 @@ Required schema:
   ],
   "parlay": {
     "combined_probability": 58,
-    "strongest_leg": "Player Name — 72%",
-    "weakest_leg": "Player Name — 38%",
+    "strongest_leg": "Player Name (72%)",
+    "weakest_leg": "Player Name (38%)",
     "correlation_warning": null,
     "risk_note": "Brief parlay risk assessment"
   }
